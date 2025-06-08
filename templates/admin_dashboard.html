@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50100%); color: white;">
         <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">👨‍💼 Admin Dashboard</h1>
         <p>Welcome back, {{ current_user.username }}! Manage your election system with powerful tools.</p>
     </div>
@@ -12,26 +12,26 @@
     <!-- Statistics -->
     <div class="grid">
         <div class="card" style="text-align: center;">
-            <h3 style="color: #667eea;">👥 Total Voters</h3>
-            <div style="font-size: 3rem; font-weight: bold; color: #667eea;">{{ total_voters }}</div>
+            <h3 style="color: #E74C3C;">👥 Total Voters</h3>
+            <div style="font-size: 3rem; font-weight: bold; color: #E74C3C;">{{ total_voters }}</div>
         </div>
         <div class="card" style="text-align: center;">
-            <h3 style="color: #667eea;">🏆 Nominees</h3>
-            <div style="font-size: 3rem; font-weight: bold; color: #667eea;">{{ total_nominees }}</div>
+            <h3 style="color: #E74C3C;">🏆 Nominees</h3>
+            <div style="font-size: 3rem; font-weight: bold; color: #E74C3C;">{{ total_nominees }}</div>
         </div>
         <div class="card" style="text-align: center;">
-            <h3 style="color: #667eea;">🗳️ Votes Cast</h3>
-            <div style="font-size: 3rem; font-weight: bold; color: #667eea;">{{ votes_cast }}</div>
+            <h3 style="color: #E74C3C;">🗳️ Votes Cast</h3>
+            <div style="font-size: 3rem; font-weight: bold; color: #E74C3C;">{{ votes_cast }}</div>
         </div>
         <div class="card" style="text-align: center;">
-            <h3 style="color: #667eea;">📊 Positions</h3>
-            <div style="font-size: 3rem; font-weight: bold; color: #667eea;">{{ total_positions }}</div>
+            <h3 style="color: #E74C3C;">📊 Positions</h3>
+            <div style="font-size: 3rem; font-weight: bold; color: #E74C3C;">{{ total_positions }}</div>
         </div>
     </div>
 
     <!-- Election Control -->
     <div class="card">
-        <h3 style="color: #667eea; margin-bottom: 1.5rem;">⚡ Election Control Center</h3>
+        <h3 style="color: #E74C3C; margin-bottom: 1.5rem;">⚡ Election Control Center</h3>
         
         {% if active_election %}
         <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem;">
@@ -69,7 +69,7 @@
     <!-- Quick Actions -->
     <div class="grid">
         <div class="card">
-            <h4 style="color: #667eea;">🏆 Manage Nominees</h4>
+            <h4 style="color: #E74C3C;">🏆 Manage Nominees</h4>
             <p>Add and manage candidates for all positions.</p>
             <div style="margin-top: 1rem;">
                 <a href="{{ url_for('manage_nominees') }}" class="btn">Manage Nominees</a>
@@ -77,7 +77,7 @@
         </div>
         
         <div class="card">
-            <h4 style="color: #667eea;">📋 Manage Positions</h4>
+            <h4 style="color: #E74C3C;">📋 Manage Positions</h4>
             <p>Configure election positions and requirements.</p>
             <div style="margin-top: 1rem;">
                 <a href="{{ url_for('manage_positions') }}" class="btn">Manage Positions</a>
@@ -85,7 +85,7 @@
         </div>
         
         <div class="card">
-            <h4 style="color: #667eea;">👥 Manage Voters</h4>
+            <h4 style="color: #E74C3C;">👥 Manage Voters</h4>
             <p>Register students and manage voter accounts.</p>
             <div style="margin-top: 1rem;">
                 <a href="{{ url_for('manage_voters') }}" class="btn">Manage Voters</a>
@@ -93,7 +93,7 @@
         </div>
         
         <div class="card">
-            <h4 style="color: #667eea;">🎭 Manage Partylists</h4>
+            <h4 style="color: #E74C3C;">🎭 Manage Partylists</h4>
             <p>Create and manage political parties.</p>
             <div style="margin-top: 1rem;">
                 <a href="{{ url_for('manage_partylists') }}" class="btn">Manage Partylists</a>
@@ -101,7 +101,7 @@
         </div>
 
         <div class="card">
-            <h4 style="color: #667eea;">🗳️ Manage Elections</h4>
+            <h4 style="color: #E74C3C;">🗳️ Manage Elections</h4>
             <p>Create new elections and manage existing campaigns.</p>
             <div style="margin-top: 1rem;">
                 <a href="{{ url_for('manage_elections') }}" class="btn">Manage Elections</a>
@@ -111,7 +111,7 @@
 
     <!-- Recent Activity -->
     <div class="card">
-        <h3 style="color: #667eea; margin-bottom: 1.5rem;">🔔 Recent Activity</h3>
+        <h3 style="color: #E74C3C; margin-bottom: 1.5rem;">🔔 Recent Activity</h3>
         <div style="background: #f8f9fa; border-radius: 10px; padding: 1rem;">
             <div style="display: flex; align-items: center; margin-bottom: 1rem;">
                 <div style="width: 40px; height: 40px; background: #51cf66; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; color: white;">🗳️</div>
@@ -121,7 +121,7 @@
                 </div>
             </div>
             <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 40px; height: 40px; background: #667eea; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; color: white;">👤</div>
+                <div style="width: 40px; height: 40px; background: #E74C3C; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; color: white;">👤</div>
                 <div>
                     <div style="font-weight: 600;">Student registration update</div>
                     <div style="color: #666; font-size: 0.9rem;">5 new voters registered today</div>
@@ -142,8 +142,16 @@
 {% block extra_js %}
 <script>
 function startElection() {
+    // Get the first available election ID
+    {% if active_election %}
+    const electionId = {{ active_election.id }};
+    {% else %}
+    alert('No election found to start!');
+    return;
+    {% endif %}
+    
     if (confirm('Are you sure you want to start the election? Students will be able to vote.')) {
-        fetch('/admin/election/start/1', { method: 'GET' })
+        fetch(`/admin/election/start/${electionId}`, { method: 'GET' })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -160,8 +168,15 @@ function startElection() {
 }
 
 function stopElection() {
+    {% if active_election %}
+    const electionId = {{ active_election.id }};
+    {% else %}
+    alert('No active election found!');
+    return;
+    {% endif %}
+    
     if (confirm('Are you sure you want to stop the election? This will finalize all results.')) {
-        fetch('/admin/election/stop/1', { method: 'GET' })
+        fetch(`/admin/election/stop/${electionId}`, { method: 'GET' })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {

@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50100%); color: white; text-align: center;">
         <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">🗳️ Student Voting Portal</h1>
         <p>Welcome, {{ current_user.name }}! Your voice matters in shaping our student community.</p>
         <p style="opacity: 0.9; margin-top: 0.5rem;">Student ID: {{ current_user.student_id }}</p>
@@ -13,7 +13,7 @@
     {% if not active_election or not active_election.is_active %}
         <div class="card" style="text-align: center;">
             <div style="font-size: 4rem; margin-bottom: 1rem;">⏰</div>
-            <h2 style="color: #667eea;">No Active Election</h2>
+            <h2 style="color: #E74C3C;">No Active Election</h2>
             <p>There is currently no active election. Please check back later or contact your election administrator.</p>
             <div style="margin-top: 2rem;">
                 <a href="{{ url_for('view_results') }}" class="btn">View Previous Results</a>
@@ -32,7 +32,7 @@
 
         <!-- Voting Receipt/Summary -->
         <div class="card">
-            <h3 style="color: #667eea; text-align: center; margin-bottom: 1.5rem;">📝 Your Voting Receipt</h3>
+            <h3 style="color: #E74C3C; text-align: center; margin-bottom: 1.5rem;">📝 Your Voting Receipt</h3>
             <div style="background: #f8f9fa; padding: 2rem; border-radius: 15px; text-align: center;">
                 <div style="margin-bottom: 1rem;">
                     <strong>Election:</strong> {{ active_election.title }}
@@ -51,7 +51,7 @@
     {% else %}
         <!-- Active Voting Interface -->
         <div class="card">
-            <h3 style="color: #667eea; text-align: center; margin-bottom: 2rem;">{{ active_election.title }}</h3>
+            <h3 style="color: #E74C3C; text-align: center; margin-bottom: 2rem;">{{ active_election.title }}</h3>
             <p style="text-align: center; color: #666; margin-bottom: 2rem;">
                 {{ active_election.description or "Please select your preferred candidates for each position. You can only vote once." }}
             </p>
@@ -59,7 +59,7 @@
             <form id="votingForm">
                 {% for position in positions %}
                 <div style="background: #f8f9fa; border-radius: 15px; padding: 2rem; margin: 2rem 0;">
-                    <h4 style="color: #667eea; text-align: center; margin-bottom: 1.5rem;">
+                    <h4 style="color: #E74C3C; text-align: center; margin-bottom: 1.5rem;">
                         {% if position.title == 'President' %}🏛️{% elif position.title == 'Vice President' %}⚖️{% elif position.title == 'Secretary' %}📝{% elif position.title == 'Treasurer' %}💰{% else %}🎯{% endif %}
                         {{ position.title }}
                     </h4>
@@ -87,7 +87,7 @@
                                     {% endif %}
                                     
                                     {% if nominee.motto %}
-                                        <p style="font-style: italic; color: #666; margin-bottom: 0.5rem; border-left: 3px solid #667eea; padding-left: 1rem;">
+                                        <p style="font-style: italic; color: #666; margin-bottom: 0.5rem; border-left: 3px solid #E74C3C; padding-left: 1rem;">
                                             "{{ nominee.motto }}"
                                         </p>
                                     {% endif %}
@@ -113,7 +113,7 @@
                 {% if positions %}
                 <div style="text-align: center; margin: 3rem 0;">
                     <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
-                        <h4 style="color: #667eea; margin-bottom: 1rem;">Ready to Submit Your Vote?</h4>
+                        <h4 style="color: #E74C3C; margin-bottom: 1rem;">Ready to Submit Your Vote?</h4>
                         <p style="color: #666; margin-bottom: 2rem;">
                             Please review your selections above. Once submitted, your vote cannot be changed.
                         </p>
@@ -130,7 +130,7 @@
         {% if not positions %}
         <div class="card" style="text-align: center;">
             <div style="font-size: 4rem; margin-bottom: 1rem;">📋</div>
-            <h3 style="color: #667eea;">No Positions Configured</h3>
+            <h3 style="color: #E74C3C;">No Positions Configured</h3>
             <p>The election administrator has not yet configured the positions for this election.</p>
         </div>
         {% endif %}
@@ -165,7 +165,7 @@ function selectNominee(card, positionId, nomineeId) {
     });
     
     // Select this card
-    card.style.borderColor = '#667eea';
+    card.style.borderColor = '#E74C3C';
     card.style.background = 'rgba(102, 126, 234, 0.05)';
     card.style.transform = 'translateY(-2px)';
     card.style.boxShadow = '0 10px 25px rgba(102, 126, 234, 0.15)';

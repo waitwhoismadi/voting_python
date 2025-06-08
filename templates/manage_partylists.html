@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50100%); color: white;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
                 <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎭 Manage Partylists</h1>
@@ -17,147 +17,100 @@
         </div>
     </div>
 
-    <!-- Partylists Grid -->
+    {% if partylists %}
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin: 2rem 0;">
-        <!-- Progressive Party -->
-        <div class="card" style="border-left: 5px solid #667eea;">
+        {% for partylist in partylists %}
+        <div class="card" style="border-left: 5px solid {{ partylist.color }};">
             <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 50px; height: 50px; background: #667eea; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 1rem;">
-                    PP
+                <div style="width: 50px; height: 50px; background: {{ partylist.color }}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 1rem;">
+                    {{ partylist.name[:2].upper() }}
                 </div>
                 <div>
-                    <h3 style="color: #667eea; margin-bottom: 0.25rem;">Progressive Party</h3>
-                    <p style="color: #666; font-size: 0.9rem; margin: 0;">Forward-thinking student leadership</p>
+                    <h3 style="color: {{ partylist.color }}; margin-bottom: 0.25rem;">{{ partylist.name }}</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin: 0;">{{ partylist.description or 'No description provided' }}</p>
                 </div>
             </div>
-            
-            <p style="color: #555; margin-bottom: 1.5rem; line-height: 1.6;">
-                Focused on progressive policies, environmental sustainability, and inclusive campus initiatives. 
-                Advocates for modern solutions to student challenges.
-            </p>
             
             <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                     <span style="color: #666;">Members:</span>
-                    <span style="font-weight: bold; color: #667eea;">3 nominees</span>
+                    <span style="font-weight: bold; color: {{ partylist.color }};">{{ partylist.nominees|length }} nominees</span>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
                     <span style="color: #666;">Total Votes:</span>
-                    <span style="font-weight: bold; color: #667eea;">1,258 votes</span>
+                    <span style="font-weight: bold; color: {{ partylist.color }};">
+                        {% set total_votes = namespace(value=0) %}
+                        {% for nominee in partylist.nominees %}
+                            {% set total_votes.value = total_votes.value + nominee.vote_count %}
+                        {% endfor %}
+                        {{ total_votes.value }} votes
+                    </span>
                 </div>
             </div>
             
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">👁️ View Details</button>
-                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #17a2b8;">✏️ Edit</button>
-                <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;">🗑️ Delete</button>
+                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="viewPartylist({{ partylist.id }})">👁️ View Details</button>
+                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #17a2b8;" onclick="editPartylist({{ partylist.id }})">✏️ Edit</button>
+                <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="deletePartylist({{ partylist.id }})">🗑️ Delete</button>
             </div>
         </div>
-
-        <!-- Unity Coalition -->
-        <div class="card" style="border-left: 5px solid #764ba2;">
-            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 50px; height: 50px; background: #764ba2; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 1rem;">
-                    UC
-                </div>
-                <div>
-                    <h3 style="color: #764ba2; margin-bottom: 0.25rem;">Unity Coalition</h3>
-                    <p style="color: #666; font-size: 0.9rem; margin: 0;">Bringing students together</p>
-                </div>
-            </div>
-            
-            <p style="color: #555; margin-bottom: 1.5rem; line-height: 1.6;">
-                Emphasizes collaboration across different student groups and focuses on traditional values 
-                while promoting unity and school spirit.
-            </p>
-            
-            <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span style="color: #666;">Members:</span>
-                    <span style="font-weight: bold; color: #764ba2;">2 nominees</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: #666;">Total Votes:</span>
-                    <span style="font-weight: bold; color: #764ba2;">876 votes</span>
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">👁️ View Details</button>
-                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #17a2b8;">✏️ Edit</button>
-                <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;">🗑️ Delete</button>
-            </div>
-        </div>
-
-        <!-- Independent -->
-        <div class="card" style="border-left: 5px solid #51cf66;">
-            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                <div style="width: 50px; height: 50px; background: #51cf66; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 1rem;">
-                    IND
-                </div>
-                <div>
-                    <h3 style="color: #51cf66; margin-bottom: 0.25rem;">Independent</h3>
-                    <p style="color: #666; font-size: 0.9rem; margin: 0;">Non-partisan candidates</p>
-                </div>
-            </div>
-            
-            <p style="color: #555; margin-bottom: 1.5rem; line-height: 1.6;">
-                Candidates running without party affiliation, focusing on individual merit and 
-                issue-based platforms rather than party politics.
-            </p>
-            
-            <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span style="color: #666;">Members:</span>
-                    <span style="font-weight: bold; color: #51cf66;">1 nominee</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: #666;">Total Votes:</span>
-                    <span style="font-weight: bold; color: #51cf66;">489 votes</span>
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">👁️ View Details</button>
-                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #17a2b8;">✏️ Edit</button>
-                <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;">🗑️ Delete</button>
-            </div>
-        </div>
+        {% endfor %}
     </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem; color: #666;">
+        <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">🎭</div>
+        <h3>No partylists found</h3>
+        <p>Create your first partylist to get started.</p>
+        <button class="btn" onclick="openAddPartyModal()">Create First Partylist</button>
+    </div>
+    {% endif %}
 
-    <!-- Statistics -->
     <div class="card">
-        <h3 style="color: #667eea; margin-bottom: 1.5rem; text-align: center;">📊 Partylist Performance</h3>
+        <h3 style="color: #E74C3C; margin-bottom: 1.5rem; text-align: center;">📊 Partylist Performance</h3>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
             <div style="text-align: center;">
-                <div style="font-size: 2rem; font-weight: bold; color: #667eea; margin-bottom: 0.5rem;">3</div>
+                <div style="font-size: 2rem; font-weight: bold; color: #E74C3C; margin-bottom: 0.5rem;">{{ partylists|length }}</div>
                 <div style="color: #666;">Active Partylists</div>
             </div>
             <div style="text-align: center;">
-                <div style="font-size: 2rem; font-weight: bold; color: #667eea; margin-bottom: 0.5rem;">2,623</div>
+                <div style="font-size: 2rem; font-weight: bold; color: #E74C3C; margin-bottom: 0.5rem;">
+                    {% set total_partylist_votes = namespace(value=0) %}
+                    {% for partylist in partylists %}
+                        {% for nominee in partylist.nominees %}
+                            {% set total_partylist_votes.value = total_partylist_votes.value + nominee.vote_count %}
+                        {% endfor %}
+                    {% endfor %}
+                    {{ total_partylist_votes.value }}
+                </div>
                 <div style="color: #666;">Total Partylist Votes</div>
             </div>
             <div style="text-align: center;">
-                <div style="font-size: 2rem; font-weight: bold; color: #667eea; margin-bottom: 0.5rem;">489</div>
+                <div style="font-size: 2rem; font-weight: bold; color: #E74C3C; margin-bottom: 0.5rem;">
+                    {% set independent_votes = namespace(value=0) %}
+                    {% for nominee in nominees %}
+                        {% if not nominee.partylist %}
+                            {% set independent_votes.value = independent_votes.value + nominee.vote_count %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ independent_votes.value }}
+                </div>
                 <div style="color: #666;">Independent Votes</div>
-            </div>
-            <div style="text-align: center;">
-                <div style="font-size: 2rem; font-weight: bold; color: #667eea; margin-bottom: 0.5rem;">84.3%</div>
-                <div style="color: #666;">Partylist Participation</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Add Partylist Modal -->
+<!-- Add/Edit Partylist Modal -->
 <div id="addPartyModal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);">
     <div style="background-color: white; margin: 5% auto; padding: 0; border-radius: 25px; width: 90%; max-width: 600px;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 25px 25px 0 0; position: relative;">
-            <h2 style="margin: 0;">Create New Partylist</h2>
+        <div style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%); color: white; padding: 2rem; border-radius: 25px 25px 0 0; position: relative;">
+            <h2 id="partyModalTitle" style="margin: 0;">Create New Partylist</h2>
             <button style="position: absolute; top: 1rem; right: 1.5rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;" onclick="closeAddPartyModal()">&times;</button>
         </div>
         <div style="padding: 2rem;">
             <form id="partyForm" onsubmit="submitParty(event)">
+                <input type="hidden" id="partyId" value="">
+                
                 <div class="form-group">
                     <label for="partyName">Partylist Name *</label>
                     <input type="text" class="form-control" id="partyName" required placeholder="e.g., Student Action Party">
@@ -171,14 +124,14 @@
                 <div class="form-group">
                     <label for="partyColor">Theme Color</label>
                     <div style="display: flex; gap: 1rem; align-items: center;">
-                        <input type="color" id="partyColor" value="#667eea" style="width: 50px; height: 40px; border-radius: 5px; border: 2px solid #e9ecef;">
+                        <input type="color" id="partyColor" value="{{ E74C3C }}" style="width: 50px; height: 40px; border-radius: 5px; border: 2px solid #e9ecef;">
                         <span style="color: #666;">Choose a color to represent your partylist</span>
                     </div>
                 </div>
                 
                 <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
                     <button type="button" class="btn" onclick="closeAddPartyModal()">Cancel</button>
-                    <button type="submit" class="btn btn-success">Create Partylist</button>
+                    <button type="submit" class="btn btn-success" id="partySubmitBtn">Create Partylist</button>
                 </div>
             </form>
         </div>
@@ -188,19 +141,103 @@
 
 {% block extra_js %}
 <script>
+let editingPartyId = null;
+
 function openAddPartyModal() {
+    editingPartyId = null;
+    document.getElementById('partyModalTitle').textContent = 'Create New Partylist';
+    document.getElementById('partySubmitBtn').textContent = 'Create Partylist';
     document.getElementById('addPartyModal').style.display = 'block';
 }
 
 function closeAddPartyModal() {
     document.getElementById('addPartyModal').style.display = 'none';
     document.getElementById('partyForm').reset();
+    editingPartyId = null;
 }
 
 function submitParty(event) {
     event.preventDefault();
-    alert('Partylist created successfully!');
-    closeAddPartyModal();
+    
+    const data = {
+        name: document.getElementById('partyName').value,
+        description: document.getElementById('partyDescription').value,
+        color: document.getElementById('partyColor').value
+    };
+    
+    const url = editingPartyId ? `/api/partylists/${editingPartyId}` : '/api/partylists';
+    const method = editingPartyId ? 'PUT' : 'POST';
+    
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(editingPartyId ? 'Partylist updated successfully!' : 'Partylist created successfully!');
+            closeAddPartyModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Network error occurred');
+    });
+}
+
+function viewPartylist(id) {
+    fetch(`/api/partylists/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            alert(`Partylist Details:\n\nName: ${data.name}\nDescription: ${data.description}\nColor: ${data.color}`);
+        })
+        .catch(error => {
+            alert('Error loading partylist details');
+        });
+}
+
+function editPartylist(id) {
+    editingPartyId = id;
+    
+    fetch(`/api/partylists/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('partyModalTitle').textContent = 'Edit Partylist';
+            document.getElementById('partySubmitBtn').textContent = 'Update Partylist';
+            document.getElementById('partyName').value = data.name;
+            document.getElementById('partyDescription').value = data.description;
+            document.getElementById('partyColor').value = data.color;
+            
+            openAddPartyModal();
+        })
+        .catch(error => {
+            alert('Error loading partylist data');
+        });
+}
+
+function deletePartylist(id) {
+    if (confirm('Are you sure you want to delete this partylist? This action cannot be undone.')) {
+        fetch(`/api/partylists/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Partylist deleted successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Network error occurred');
+        });
+    }
 }
 
 window.addEventListener('click', function(event) {

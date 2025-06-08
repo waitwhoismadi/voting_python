@@ -4,6 +4,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
@@ -15,7 +16,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Database Models
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -82,14 +82,13 @@ class Vote(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    # Check if it's a regular admin user
+
     user = User.query.get(int(user_id))
     if user:
         return user
-    # Check if it's a voter
+
     return Voter.query.get(int(user_id))
 
-# Main Routes
 @app.route('/')
 def index():
     active_election = Election.query.filter_by(is_active=True).first()
@@ -138,7 +137,6 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('index'))
 
-# Admin Routes
 @app.route('/admin')
 @login_required
 def admin_dashboard():
@@ -207,7 +205,6 @@ def manage_nominees():
                          positions=positions, 
                          partylists=partylists)
 
-# Voter Routes
 @app.route('/voter')
 @login_required
 def voter_dashboard():
@@ -227,6 +224,12 @@ def voter_dashboard():
 
 @app.route('/results')
 def view_results():
+    if current_user.is_authenticated and hasattr(current_user, 'student_id') and not current_user.has_voted:
+        active_election = Election.query.filter_by(is_active=True).first()
+        if active_election:
+            flash('You must vote before viewing results.', 'info')
+            return redirect(url_for('voter_dashboard'))
+    
     active_election = Election.query.filter_by(is_active=True).first()
     finished_election = Election.query.filter_by(is_finished=True).first()
     
@@ -250,17 +253,14 @@ def view_results():
                          total_voters=total_voters,
                          turnout=round(turnout, 1))
 
-# Election Control Routes
 @app.route('/admin/election/start/<int:election_id>')
 @login_required
 def start_election(election_id):
     if not current_user.is_admin:
         return jsonify({'success': False, 'message': 'Access denied'})
     
-    # Stop any currently active elections
     Election.query.update({Election.is_active: False})
     
-    # Start the selected election
     election = Election.query.get(election_id)
     if election:
         election.is_active = True
@@ -286,7 +286,6 @@ def stop_election(election_id):
     
     return jsonify({'success': False, 'message': 'Election not found'})
 
-# Voting Route
 @app.route('/vote', methods=['POST'])
 @login_required
 def cast_vote():
@@ -301,7 +300,7 @@ def cast_vote():
     
     try:
         for position_id, nominee_id in votes_data.items():
-            if nominee_id:  # Skip empty votes
+            if nominee_id:  
                 vote = Vote(
                     voter_id=current_user.id,
                     nominee_id=int(nominee_id),
@@ -309,12 +308,10 @@ def cast_vote():
                 )
                 db.session.add(vote)
                 
-                # Update nominee vote count
                 nominee = Nominee.query.get(int(nominee_id))
                 if nominee:
                     nominee.vote_count += 1
         
-        # Mark voter as having voted
         current_user.has_voted = True
         db.session.commit()
         
@@ -324,7 +321,6 @@ def cast_vote():
         db.session.rollback()
         return jsonify({'success': False, 'message': 'Error casting vote'})
 
-# Election Management Routes
 @app.route('/admin/elections')
 @login_required
 def manage_elections():
@@ -335,7 +331,6 @@ def manage_elections():
     elections = Election.query.order_by(Election.created_at.desc()).all()
     return render_template('manage_elections.html', elections=elections)
 
-# API Routes for CRUD operations
 @app.route('/api/elections', methods=['POST'])
 @login_required
 def create_election():
@@ -374,48 +369,6 @@ def create_nominee():
     
     return jsonify({'success': True, 'message': 'Nominee created successfully'})
 
-@app.route('/api/positions', methods=['POST'])
-@login_required
-def create_position():
-    if not current_user.is_admin:
-        return jsonify({'success': False, 'message': 'Access denied'})
-    
-    data = request.json
-    # Get the first available election or create one
-    election = Election.query.first()
-    if not election:
-        election = Election(title='Default Election', description='Main election')
-        db.session.add(election)
-        db.session.commit()
-    
-    position = Position(
-        title=data['title'],
-        description=data.get('description', ''),
-        max_votes=data.get('max_votes', 1),
-        election_id=election.id
-    )
-    db.session.add(position)
-    db.session.commit()
-    
-    return jsonify({'success': True, 'message': 'Position created successfully'})
-
-@app.route('/api/partylists', methods=['POST'])
-@login_required
-def create_partylist():
-    if not current_user.is_admin:
-        return jsonify({'success': False, 'message': 'Access denied'})
-    
-    data = request.json
-    partylist = Partylist(
-        name=data['name'],
-        description=data.get('description', ''),
-        color=data.get('color', '#007bff')
-    )
-    db.session.add(partylist)
-    db.session.commit()
-    
-    return jsonify({'success': True, 'message': 'Partylist created successfully'})
-
 @app.route('/api/voters', methods=['POST'])
 @login_required
 def create_voter():
@@ -435,7 +388,6 @@ def create_voter():
     
     return jsonify({'success': True, 'message': 'Voter created successfully'})
 
-# Utility Routes
 @app.route('/api/stats')
 @login_required
 def get_stats():
@@ -457,7 +409,207 @@ def get_stats():
     
     return jsonify(stats)
 
-# Error Handlers
+# UPDATE operations
+@app.route('/api/elections/<int:election_id>', methods=['PUT'])
+@login_required
+def update_election(election_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    data = request.json
+    election = Election.query.get(election_id)
+    if election:
+        election.title = data['title']
+        election.description = data.get('description', '')
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Election updated successfully'})
+    
+    return jsonify({'success': False, 'message': 'Election not found'})
+
+@app.route('/api/positions/<int:position_id>', methods=['PUT'])
+@login_required
+def update_position(position_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    data = request.json
+    position = Position.query.get(position_id)
+    if position:
+        position.title = data['title']
+        position.description = data.get('description', '')
+        position.max_votes = data.get('max_votes', 1)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Position updated successfully'})
+    
+    return jsonify({'success': False, 'message': 'Position not found'})
+
+@app.route('/api/nominees/<int:nominee_id>', methods=['PUT'])
+@login_required
+def update_nominee(nominee_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    data = request.json
+    nominee = Nominee.query.get(nominee_id)
+    if nominee:
+        nominee.name = data['name']
+        nominee.description = data.get('description', '')
+        nominee.motto = data.get('motto', '')
+        nominee.position_id = data['position_id']
+        nominee.partylist_id = data.get('partylist_id')
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Nominee updated successfully'})
+    
+    return jsonify({'success': False, 'message': 'Nominee not found'})
+
+@app.route('/api/partylists/<int:partylist_id>', methods=['PUT'])
+@login_required
+def update_partylist(partylist_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    data = request.json
+    partylist = Partylist.query.get(partylist_id)
+    if partylist:
+        partylist.name = data['name']
+        partylist.description = data.get('description', '')
+        partylist.color = data.get('color', '#007bff')
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Partylist updated successfully'})
+    
+    return jsonify({'success': False, 'message': 'Partylist not found'})
+
+@app.route('/api/voters/<int:voter_id>', methods=['PUT'])
+@login_required
+def update_voter(voter_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    data = request.json
+    voter = Voter.query.get(voter_id)
+    if voter:
+        voter.name = data['name']
+        voter.email = data['email']
+        voter.department = data.get('department', '')
+        voter.academic_year = data.get('academic_year', '')
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Voter updated successfully'})
+    
+    return jsonify({'success': False, 'message': 'Voter not found'})
+
+# DELETE operations
+@app.route('/api/elections/<int:election_id>', methods=['DELETE'])
+@login_required
+def delete_election(election_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    election = Election.query.get(election_id)
+    if election and not election.is_active and not election.is_finished:
+        db.session.delete(election)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Election deleted successfully'})
+    
+    return jsonify({'success': False, 'message': 'Cannot delete active or finished election'})
+
+@app.route('/api/positions/<int:position_id>', methods=['DELETE'])
+@login_required
+def delete_position(position_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    position = Position.query.get(position_id)
+    if position:
+        db.session.delete(position)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Position deleted successfully'})
+    
+    return jsonify({'success': False, 'message': 'Position not found'})
+
+@app.route('/api/nominees/<int:nominee_id>', methods=['DELETE'])
+@login_required
+def delete_nominee(nominee_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    nominee = Nominee.query.get(nominee_id)
+    if nominee:
+        db.session.delete(nominee)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Nominee deleted successfully'})
+    
+    return jsonify({'success': False, 'message': 'Nominee not found'})
+
+@app.route('/api/partylists/<int:partylist_id>', methods=['DELETE'])
+@login_required
+def delete_partylist(partylist_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    partylist = Partylist.query.get(partylist_id)
+    if partylist:
+        db.session.delete(partylist)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Partylist deleted successfully'})
+    
+    return jsonify({'success': False, 'message': 'Partylist not found'})
+
+@app.route('/api/voters/<int:voter_id>', methods=['DELETE'])
+@login_required
+def delete_voter(voter_id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    voter = Voter.query.get(voter_id)
+    if voter:
+        db.session.delete(voter)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Voter deleted successfully'})
+    
+    return jsonify({'success': False, 'message': 'Voter not found'})
+
+@app.route('/api/upload-image', methods=['POST'])
+@login_required
+def upload_image():
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'message': 'No file provided'})
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'No file selected'})
+    
+    if file:
+        filename = secure_filename(file.filename)
+        filepath = os.path.join('static/uploads', filename)
+        os.makedirs('static/uploads', exist_ok=True)
+        file.save(filepath)
+        return jsonify({'success': True, 'filename': filename, 'url': f'/static/uploads/{filename}'})
+    
+    return jsonify({'success': False, 'message': 'File upload failed'})
+
+@app.route('/admin/account', methods=['GET', 'POST'])
+@login_required
+def manage_account():
+    if not current_user.is_admin:
+        flash('Access denied', 'error')
+        return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        data = request.json
+        current_user.username = data.get('username', current_user.username)
+        current_user.email = data.get('email', current_user.email)
+        
+        if data.get('password'):
+            current_user.password_hash = generate_password_hash(data['password'])
+        
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Account updated successfully'})
+    
+    return render_template('account_settings.html')
+
 @app.errorhandler(404)
 def not_found(error):
     return render_template('error.html', 
@@ -470,12 +622,10 @@ def internal_error(error):
                          error_code=500, 
                          error_message="Internal server error"), 500
 
-# Initialize database and create sample data
 def init_db():
     with app.app_context():
         db.create_all()
         
-        # Create super admin if not exists
         if not User.query.filter_by(username='admin').first():
             admin = User(
                 username='admin',
@@ -486,7 +636,6 @@ def init_db():
             )
             db.session.add(admin)
         
-        # Create sample election
         if not Election.query.first():
             election = Election(
                 title='Student Government Election 2025',
@@ -495,7 +644,6 @@ def init_db():
             db.session.add(election)
             db.session.commit()
             
-            # Create sample positions
             positions_data = [
                 {'title': 'President', 'description': 'Student Body President'},
                 {'title': 'Vice President', 'description': 'Student Body Vice President'},
@@ -504,34 +652,34 @@ def init_db():
             ]
             
             for pos_data in positions_data:
-                position = Position(
-                    title=pos_data['title'],
-                    description=pos_data['description'],
-                    election_id=election.id
-                )
-                db.session.add(position)
+                if not Position.query.filter_by(title=pos_data['title']).first():
+                    position = Position(
+                        title=pos_data['title'],
+                        description=pos_data['description'],
+                        election_id=election.id
+                    )
+                    db.session.add(position)
             
             db.session.commit()
             
-            # Create sample partylists
             if not Partylist.query.first():
                 partylists = [
-                    {'name': 'Progressive Party', 'description': 'Forward-thinking student leadership', 'color': '#667eea'},
-                    {'name': 'Unity Coalition', 'description': 'Bringing students together', 'color': '#764ba2'},
-                    {'name': 'Independent', 'description': 'Independent candidates', 'color': '#51cf66'}
+                    {'name': 'Progressive Party', 'description': 'Forward-thinking student leadership', 'color': '#E74C3C'},
+                    {'name': 'Unity Coalition', 'description': 'Bringing students together', 'color': '#2C3E50'},
+                    {'name': 'Independent', 'description': 'Independent candidates', 'color': '#27AE60'}
                 ]
                 
                 for party_data in partylists:
-                    party = Partylist(
-                        name=party_data['name'],
-                        description=party_data['description'],
-                        color=party_data['color']
-                    )
-                    db.session.add(party)
+                    if not Partylist.query.filter_by(name=party_data['name']).first():
+                        party = Partylist(
+                            name=party_data['name'],
+                            description=party_data['description'],
+                            color=party_data['color']
+                        )
+                        db.session.add(party)
                 
                 db.session.commit()
             
-            # Create sample nominees
             if not Nominee.query.first():
                 positions = Position.query.all()
                 partylists = Partylist.query.all()
@@ -571,7 +719,7 @@ def init_db():
                     position = next((p for p in positions if p.title == nominee_data['position']), None)
                     party = next((p for p in partylists if p.name == nominee_data['party']), None)
                     
-                    if position:
+                    if position and not Nominee.query.filter_by(name=nominee_data['name'], position_id=position.id).first():
                         nominee = Nominee(
                             name=nominee_data['name'],
                             motto=nominee_data['motto'],
@@ -583,15 +731,19 @@ def init_db():
                 
                 db.session.commit()
         
-        # Create sample voters
-        if not Voter.query.filter_by(student_id='2025001').first():
-            voters_data = [
-                {'student_id': '2025001', 'name': 'John Doe', 'email': 'john.doe@student.edu', 'department': 'CS', 'academic_year': '2025'},
-                {'student_id': '2025002', 'name': 'Jane Smith', 'email': 'jane.smith@student.edu', 'department': 'ENG', 'academic_year': '2024'},
-                {'student_id': '2025003', 'name': 'Bob Wilson', 'email': 'bob.wilson@student.edu', 'department': 'BUS', 'academic_year': '2023'}
-            ]
+        voters_data = [
+            {'student_id': '2025001', 'name': 'John Doe', 'email': 'john.doe@student.edu', 'department': 'CS', 'academic_year': '2025'},
+            {'student_id': '2025002', 'name': 'Jane Smith', 'email': 'jane.smith@student.edu', 'department': 'ENG', 'academic_year': '2024'},
+            {'student_id': '2025003', 'name': 'Bob Wilson', 'email': 'bob.wilson@student.edu', 'department': 'BUS', 'academic_year': '2023'}
+        ]
+        
+        for voter_data in voters_data:
+            existing_voter = Voter.query.filter(
+                (Voter.student_id == voter_data['student_id']) | 
+                (Voter.email == voter_data['email'])
+            ).first()
             
-            for voter_data in voters_data:
+            if not existing_voter:
                 voter = Voter(
                     student_id=voter_data['student_id'],
                     name=voter_data['name'],
@@ -600,8 +752,178 @@ def init_db():
                     academic_year=voter_data['academic_year']
                 )
                 db.session.add(voter)
-            
+        
+        try:
             db.session.commit()
+            print("✅ Database initialized successfully!")
+        except Exception as e:
+            print(f"❌ Database initialization error: {e}")
+            db.session.rollback()
+
+@app.route('/api/elections/<int:election_id>')
+@login_required
+def get_election(election_id):
+    if not current_user.is_admin:
+        return jsonify({'error': 'Access denied'})
+    
+    election = Election.query.get(election_id)
+    if election:
+        return jsonify({
+            'id': election.id,
+            'title': election.title,
+            'description': election.description,
+            'is_active': election.is_active,
+            'is_finished': election.is_finished
+        })
+    return jsonify({'error': 'Election not found'}), 404
+
+@app.route('/api/nominees/<int:nominee_id>')
+@login_required
+def get_nominee(nominee_id):
+    if not current_user.is_admin:
+        return jsonify({'error': 'Access denied'})
+    
+    nominee = Nominee.query.get(nominee_id)
+    if nominee:
+        return jsonify({
+            'id': nominee.id,
+            'name': nominee.name,
+            'description': nominee.description,
+            'motto': nominee.motto,
+            'position_id': nominee.position_id,
+            'partylist_id': nominee.partylist_id,
+            'image_url': nominee.image_url
+        })
+    return jsonify({'error': 'Nominee not found'}), 404
+
+@app.route('/api/positions/<int:position_id>')
+@login_required
+def get_position(position_id):
+    if not current_user.is_admin:
+        return jsonify({'error': 'Access denied'})
+    
+    position = Position.query.get(position_id)
+    if position:
+        return jsonify({
+            'id': position.id,
+            'title': position.title,
+            'description': position.description,
+            'max_votes': position.max_votes,
+            'election_id': position.election_id
+        })
+    return jsonify({'error': 'Position not found'}), 404
+
+@app.route('/api/voters/<int:voter_id>')
+@login_required
+def get_voter(voter_id):
+    if not current_user.is_admin:
+        return jsonify({'error': 'Access denied'})
+    
+    voter = Voter.query.get(voter_id)
+    if voter:
+        return jsonify({
+            'id': voter.id,
+            'student_id': voter.student_id,
+            'name': voter.name,
+            'email': voter.email,
+            'department': voter.department,
+            'academic_year': voter.academic_year
+        })
+    return jsonify({'error': 'Voter not found'}), 404
+
+@app.route('/api/partylists/<int:partylist_id>')
+@login_required
+def get_partylist(partylist_id):
+    if not current_user.is_admin:
+        return jsonify({'error': 'Access denied'})
+    
+    partylist = Partylist.query.get(partylist_id)
+    if partylist:
+        return jsonify({
+            'id': partylist.id,
+            'name': partylist.name,
+            'description': partylist.description,
+            'color': partylist.color
+        })
+    return jsonify({'error': 'Partylist not found'}), 404
+
+
+@app.route('/api/partylists', methods=['POST'])
+@login_required
+def create_partylist():
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    data = request.json
+    partylist = Partylist(
+        name=data['name'],
+        description=data.get('description', ''),
+        color=data.get('color', '#007bff')
+    )
+    db.session.add(partylist)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Partylist created successfully', 'partylist_id': partylist.id})
+
+@app.route('/api/positions', methods=['POST'])
+@login_required
+def create_position():
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'})
+    
+    data = request.json
+    election = Election.query.first()
+    if not election:
+        election = Election(title='Default Election', description='Main election')
+        db.session.add(election)
+        db.session.commit()
+    
+    position = Position(
+        title=data['title'],
+        description=data.get('description', ''),
+        max_votes=data.get('max_votes', 1),
+        election_id=election.id
+    )
+    db.session.add(position)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Position created successfully', 'position_id': position.id})
+
+@app.route('/api/all-positions')
+@login_required
+def get_all_positions():
+    if not current_user.is_admin:
+        return jsonify({'error': 'Access denied'})
+    
+    positions = Position.query.all()
+    positions_data = []
+    for position in positions:
+        positions_data.append({
+            'id': position.id,
+            'title': position.title,
+            'description': position.description,
+            'max_votes': position.max_votes
+        })
+    
+    return jsonify({'positions': positions_data})
+
+@app.route('/api/all-partylists')
+@login_required
+def get_all_partylists():
+    if not current_user.is_admin:
+        return jsonify({'error': 'Access denied'})
+    
+    partylists = Partylist.query.all()
+    partylists_data = []
+    for partylist in partylists:
+        partylists_data.append({
+            'id': partylist.id,
+            'name': partylist.name,
+            'description': partylist.description,
+            'color': partylist.color
+        })
+    
+    return jsonify({'partylists': partylists_data})
 
 if __name__ == '__main__':
     init_db()

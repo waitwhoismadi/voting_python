@@ -3,8 +3,24 @@
 {% block title %}Manage Elections - Admin Panel{% endblock %}
 
 {% block content %}
+
+<style>
+.wizard-step {
+    display: none;
+}
+.wizard-step.active {
+    display: block;
+}
+.step-indicator.active span {
+    background: #E74C3C !important;
+}
+.step-indicator.completed span {
+    background: #27AE60 !important;
+}
+</style>
+
 <div class="container">
-    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50100%); color: white;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
                 <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">🗳️ Manage Elections</h1>
@@ -27,7 +43,7 @@
                 <p style="color: #155724; font-size: 0.9rem;">Set up the main election container with title and description</p>
             </div>
             <div style="text-align: center; padding: 1rem;">
-                <div style="width: 60px; height: 60px; background: #667eea; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem; font-weight: bold;">2</div>
+                <div style="width: 60px; height: 60px; background: #E74C3C; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem; font-weight: bold;">2</div>
                 <h4 style="color: #155724; margin-bottom: 0.5rem;">Add Positions</h4>
                 <p style="color: #155724; font-size: 0.9rem;">Create positions like President, VP, Secretary, etc.</p>
             </div>
@@ -50,189 +66,689 @@
     </div>
 
     <!-- Existing Elections -->
-    <div class="card">
-        <h3 style="color: #667eea; margin-bottom: 1.5rem;">🗳️ All Elections</h3>
-        
-        {% if elections %}
-        <div style="display: grid; gap: 1.5rem;">
-            {% for election in elections %}
-            <div style="border: 2px solid {% if election.is_active %}#28a745{% elif election.is_finished %}#6c757d{% else %}#ffc107{% endif %}; border-radius: 15px; padding: 2rem; background: {% if election.is_active %}rgba(40, 167, 69, 0.05){% elif election.is_finished %}rgba(108, 117, 125, 0.05){% else %}rgba(255, 193, 7, 0.05){% endif %};">
-                <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem;">
-                    <div style="flex: 1;">
-                        <h4 style="color: #333; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 1rem;">
-                            {{ election.title }}
-                            {% if election.is_active %}
-                                <span style="background: #28a745; color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">🟢 ACTIVE</span>
-                            {% elif election.is_finished %}
-                                <span style="background: #6c757d; color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">⏹️ FINISHED</span>
-                            {% else %}
-                                <span style="background: #ffc107; color: #333; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">⏸️ INACTIVE</span>
-                            {% endif %}
-                        </h4>
-                        <p style="color: #666; margin-bottom: 1rem;">{{ election.description or 'No description provided' }}</p>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
-                            <div>
-                                <strong>Positions:</strong> {{ election.positions|length }}
-                            </div>
-                            <div>
-                                <strong>Nominees:</strong> 
-                                {% set total_nominees = 0 %}
-                                {% for position in election.positions %}
-                                    {% set total_nominees = total_nominees + position.nominees|length %}
-                                {% endfor %}
-                                {{ total_nominees }}
-                            </div>
-                            <div>
-                                <strong>Created:</strong> {{ election.created_at.strftime('%b %d, %Y') }}
-                            </div>
-                            {% if election.start_time %}
-                            <div>
-                                <strong>Started:</strong> {{ election.start_time.strftime('%b %d, %Y at %I:%M %p') }}
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
+     <!-- Existing Elections -->
+<div class="card">
+    <h3 style="color: #E74C3C; margin-bottom: 1.5rem;">🗳️ All Elections</h3>
+    
+    {% if elections %}
+    <div style="display: grid; gap: 1.5rem;">
+        {% for election in elections %}
+        <div style="border: 2px solid {% if election.is_active %}#28a745{% elif election.is_finished %}#6c757d{% else %}#ffc107{% endif %}; border-radius: 15px; padding: 2rem; background: {% if election.is_active %}rgba(40, 167, 69, 0.05){% elif election.is_finished %}rgba(108, 117, 125, 0.05){% else %}rgba(255, 193, 7, 0.05){% endif %};">
+            <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem;">
+                <div style="flex: 1;">
+                    <h4 style="color: #333; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 1rem;">
+                        {{ election.title }}
+                        {% if election.is_active %}
+                            <span style="background: #28a745; color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">🟢 ACTIVE</span>
+                        {% elif election.is_finished %}
+                            <span style="background: #6c757d; color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">⏹️ FINISHED</span>
+                        {% else %}
+                            <span style="background: #ffc107; color: #333; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">⏸️ INACTIVE</span>
+                        {% endif %}
+                    </h4>
+                    <p style="color: #666; margin-bottom: 1rem;">{{ election.description or 'No description provided' }}</p>
                     
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        {% if not election.is_finished %}
-                            {% if election.is_active %}
-                                <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="stopElection({{ election.id }})">🛑 Stop</button>
-                            {% else %}
-                                <button class="btn btn-success" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="startElection({{ election.id }})">▶️ Start</button>
-                            {% endif %}
-                        {% endif %}
-                        
-                        <a href="{{ url_for('manage_positions') }}" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">📋 Positions</a>
-                        <a href="{{ url_for('manage_nominees') }}" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">🏆 Nominees</a>
-                        
-                        {% if not election.is_active and not election.is_finished %}
-                            <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #17a2b8;" onclick="editElection({{ election.id }})">✏️ Edit</button>
-                            <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="deleteElection({{ election.id }})">🗑️ Delete</button>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <strong>Positions:</strong> {{ election.positions|length }}
+                        </div>
+                        <div>
+                            <strong>Nominees:</strong> 
+                            {% set total_nominees = 0 %}
+                            {% for position in election.positions %}
+                                {% set total_nominees = total_nominees + position.nominees|length %}
+                            {% endfor %}
+                            {{ total_nominees }}
+                        </div>
+                        <div>
+                            <strong>Created:</strong> {{ election.created_at.strftime('%b %d, %Y') }}
+                        </div>
+                        {% if election.start_time %}
+                        <div>
+                            <strong>Started:</strong> {{ election.start_time.strftime('%b %d, %Y at %I:%M %p') }}
+                        </div>
                         {% endif %}
                     </div>
                 </div>
                 
-                <!-- Quick Setup Actions -->
-                {% set total_nominees = 0 %}
-                {% for position in election.positions %}
-                    {% set total_nominees = total_nominees + position.nominees|length %}
-                {% endfor %}
-                
-                {% if election.positions|length == 0 %}
-                <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 1rem; margin-top: 1rem;">
-                    <div style="color: #856404; font-weight: 600;">⚠️ Setup Required</div>
-                    <div style="color: #856404; font-size: 0.9rem; margin-top: 0.5rem;">This election needs positions before nominees can be added.</div>
-                    <a href="{{ url_for('manage_positions') }}" class="btn" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.85rem;">+ Add Positions</a>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    {% if not election.is_finished %}
+                        {% if election.is_active %}
+                            <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="stopElection({{ election.id }})">🛑 Stop</button>
+                        {% else %}
+                            <button class="btn btn-success" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="startElection({{ election.id }})">▶️ Start</button>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <a href="{{ url_for('manage_positions') }}" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">📋 Positions</a>
+                    <a href="{{ url_for('manage_nominees') }}" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">🏆 Nominees</a>
+                    <a href="{{ url_for('view_results') }}" class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">📊 Results</a>
+                    
+                    {% if not election.is_active and not election.is_finished %}
+                        <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #17a2b8;" onclick="editElection({{ election.id }})">✏️ Edit</button>
+                        <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="deleteElection({{ election.id }})">🗑️ Delete</button>
+                    {% endif %}
+                    
+                    <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #6f42c1;" onclick="exportData()">💾 Export</button>
                 </div>
-                {% elif total_nominees == 0 %}
-                <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 1rem; margin-top: 1rem;">
-                    <div style="color: #856404; font-weight: 600;">⚠️ Nominees Needed</div>
-                    <div style="color: #856404; font-size: 0.9rem; margin-top: 0.5rem;">Add candidates to start the election.</div>
-                    <a href="{{ url_for('manage_nominees') }}" class="btn" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.85rem;">+ Add Nominees</a>
-                </div>
-                {% elif not election.is_active and not election.is_finished %}
-                <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 10px; padding: 1rem; margin-top: 1rem;">
-                    <div style="color: #155724; font-weight: 600;">✅ Ready to Start</div>
-                    <div style="color: #155724; font-size: 0.9rem; margin-top: 0.5rem;">This election is configured and ready to begin.</div>
-                    <button class="btn btn-success" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="startElection({{ election.id }})">🚀 Start Election</button>
-                </div>
-                {% endif %}
             </div>
+            
+            <!-- Quick Setup Actions -->
+            {% set total_nominees = 0 %}
+            {% for position in election.positions %}
+                {% set total_nominees = total_nominees + position.nominees|length %}
             {% endfor %}
+            
+            {% if election.positions|length == 0 %}
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 1rem; margin-top: 1rem;">
+                <div style="color: #856404; font-weight: 600;">⚠️ Setup Required</div>
+                <div style="color: #856404; font-size: 0.9rem; margin-top: 0.5rem;">This election needs positions before nominees can be added.</div>
+                <a href="{{ url_for('manage_positions') }}" class="btn" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.85rem;">+ Add Positions</a>
+            </div>
+            {% elif total_nominees == 0 %}
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 1rem; margin-top: 1rem;">
+                <div style="color: #856404; font-weight: 600;">⚠️ Nominees Needed</div>
+                <div style="color: #856404; font-size: 0.9rem; margin-top: 0.5rem;">Add candidates to start the election.</div>
+                <a href="{{ url_for('manage_nominees') }}" class="btn" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.85rem;">+ Add Nominees</a>
+            </div>
+            {% elif not election.is_active and not election.is_finished %}
+            <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 10px; padding: 1rem; margin-top: 1rem;">
+                <div style="color: #155724; font-weight: 600;">✅ Ready to Start</div>
+                <div style="color: #155724; font-size: 0.9rem; margin-top: 0.5rem;">This election is configured and ready to begin.</div>
+                <button class="btn btn-success" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="startElection({{ election.id }})">🚀 Start Election</button>
+            </div>
+            {% endif %}
         </div>
-        {% else %}
-        <div style="text-align: center; padding: 4rem 2rem; color: #666;">
-            <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">🗳️</div>
-            <h3>No Elections Found</h3>
-            <p>Create your first election to get started with the voting system.</p>
-            <button class="btn" onclick="openCreateElectionModal()">Create First Election</button>
-        </div>
-        {% endif %}
+        {% endfor %}
     </div>
+    {% else %}
+    <div style="text-align: center; padding: 4rem 2rem; color: #666;">
+        <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">🗳️</div>
+        <h3>No Elections Found</h3>
+        <p>Create your first election to get started with the voting system.</p>
+        <button class="btn" onclick="openCreateElectionModal()">Create First Election</button>
+    </div>
+    {% endif %}
+</div>
 </div>
 
 <!-- Create Election Modal -->
+<!-- Create Election Wizard Modal -->
 <div id="createElectionModal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);">
-    <div style="background-color: white; margin: 5% auto; padding: 0; border-radius: 25px; width: 90%; max-width: 600px;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 25px 25px 0 0; position: relative;">
+    <div style="background-color: white; margin: 2% auto; padding: 0; border-radius: 25px; width: 95%; max-width: 900px; max-height: 90vh; overflow-y: auto;">
+        <div style="background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%); color: white; padding: 2rem; border-radius: 25px 25px 0 0; position: relative;">
             <h2 style="margin: 0;">🗳️ Create New Election</h2>
+            <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Configure your election using existing data or create new items</p>
             <button style="position: absolute; top: 1rem; right: 1.5rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;" onclick="closeCreateElectionModal()">&times;</button>
         </div>
+        
         <div style="padding: 2rem;">
-            <form id="electionForm" onsubmit="createElection(event)">
-                <div class="form-group">
-                    <label for="electionTitle">Election Title *</label>
-                    <input type="text" class="form-control" id="electionTitle" required placeholder="e.g., Spring 2025 Student Government Election">
+            <form id="electionConfigForm">
+                <!-- Basic Election Info -->
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem;">
+                    <h3 style="color: #E74C3C; margin-bottom: 1.5rem;">📝 Election Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="electionTitle" style="color: #333;">Election Title *</label>
+                        <input type="text" class="form-control" id="electionTitle" required placeholder="e.g., Spring 2025 Student Government Election" style="background: white; color: #333;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="electionDescription" style="color: #333;">Description</label>
+                        <textarea class="form-control" id="electionDescription" rows="3" placeholder="Describe the purpose and scope of this election..." style="background: white; color: #333;"></textarea>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="electionDescription">Description</label>
-                    <textarea class="form-control" id="electionDescription" rows="3" placeholder="Describe the purpose and scope of this election..."></textarea>
+
+                <!-- Positions Section -->
+                <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem;">
+                    <h3 style="color: #E74C3C; margin-bottom: 1.5rem;">📋 Election Positions</h3>
+                    
+                    <div class="form-group">
+                        <label style="color: #333;">Select Existing Positions (hold Ctrl/Cmd for multiple)</label>
+                        <select multiple class="form-control" id="existingPositions" style="height: 120px; background: white; color: #333;">
+                            <!-- Options will be populated -->
+                        </select>
+                        <small style="color: #666;">Selected positions will be used in this election</small>
+                    </div>
+                    
+                    <div style="border: 2px dashed #ccc; padding: 1rem; border-radius: 10px; margin-top: 1rem; background: white;">
+                        <h5 style="color: #666; margin-bottom: 1rem;">+ Add New Position</h5>
+                        <div style="display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 1rem; align-items: end;">
+                            <div>
+                                <label for="newPositionTitle" style="color: #333;">Position Title</label>
+                                <input type="text" class="form-control" id="newPositionTitle" placeholder="e.g., President" style="background: white; color: #333;">
+                            </div>
+                            <div>
+                                <label for="newPositionDesc" style="color: #333;">Description</label>
+                                <input type="text" class="form-control" id="newPositionDesc" placeholder="Brief description" style="background: white; color: #333;">
+                            </div>
+                            <div>
+                                <label for="newPositionMaxVotes" style="color: #333;">Max Votes</label>
+                                <select class="form-control" id="newPositionMaxVotes" style="background: white; color: #333;">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-success" onclick="addNewPosition()">Add</button>
+                        </div>
+                    </div>
+                    
+                    <div id="newPositionsList" style="margin-top: 1rem;">
+                        <!-- New positions will appear here -->
+                    </div>
                 </div>
-                
-                <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 10px; margin: 1.5rem 0;">
-                    <h4 style="color: #155724; margin-bottom: 1rem;">📋 What happens next?</h4>
-                    <ol style="color: #155724; padding-left: 1.5rem;">
-                        <li>Election will be created in INACTIVE state</li>
-                        <li>Add positions (President, VP, etc.)</li>
-                        <li>Create partylists (optional)</li>
-                        <li>Add nominees/candidates</li>
-                        <li>Start the election when ready</li>
-                    </ol>
+
+                <!-- Partylists Section -->
+                 <div style="background: #fff3cd; padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem;">
+                    <h3 style="color: #E74C3C; margin-bottom: 1.5rem;">🎭 Partylists (Optional)</h3>
+                    
+                    <div class="form-group">
+                        <label style="color: #333;">Select Existing Partylists (hold Ctrl/Cmd for multiple)</label>
+                        <select multiple class="form-control" id="existingPartylists" style="height: 100px; background: white; color: #333;">
+                            <!-- Options will be populated -->
+                        </select>
+                        <small style="color: #666;">Selected partylists will be available for nominees</small>
+                    </div>
+                    
+                    <div style="border: 2px dashed #ccc; padding: 1rem; border-radius: 10px; margin-top: 1rem; background: white;">
+                        <h5 style="color: #666; margin-bottom: 1rem;">+ Add New Partylist</h5>
+                        <div style="display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 1rem; align-items: end;">
+                            <div>
+                                <label for="newPartyName" style="color: #333;">Partylist Name</label>
+                                <input type="text" class="form-control" id="newPartyName" placeholder="e.g., Progressive Party" style="background: white; color: #333;">
+                            </div>
+                            <div>
+                                <label for="newPartyDesc" style="color: #333;">Description</label>
+                                <input type="text" class="form-control" id="newPartyDesc" placeholder="Brief description" style="background: white; color: #333;">
+                            </div>
+                            <div>
+                                <label for="newPartyColor" style="color: #333;">Color</label>
+                                <input type="color" class="form-control" id="newPartyColor" value="#E74C3C" style="height: 40px; background: white;">
+                            </div>
+                            <button type="button" class="btn btn-success" onclick="addNewPartylist()">Add</button>
+                        </div>
+                    </div>
+                    
+                    <div id="newPartylistsList" style="margin-top: 1rem;">
+                        <!-- New partylists will appear here -->
+                    </div>
                 </div>
-                
-                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
-                    <button type="button" class="btn" onclick="closeCreateElectionModal()">Cancel</button>
-                    <button type="submit" class="btn btn-success">Create Election</button>
+
+                <!-- Nominees Section -->
+                <div style="background: #e1ecf4; padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem;">
+                    <h3 style="color: #E74C3C; margin-bottom: 1.5rem;">🏆 Nominees/Candidates</h3>
+                    
+                    <div style="border: 2px dashed #ccc; padding: 1rem; border-radius: 10px; background: white;">
+                        <h5 style="color: #666; margin-bottom: 1rem;">+ Add Nominees</h5>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <label for="nomineeName" style="color: #333;">Candidate Name *</label>
+                                <input type="text" class="form-control" id="nomineeName" placeholder="e.g., John Smith" style="background: white; color: #333;">
+                            </div>
+                            <div>
+                                <label for="nomineePosition" style="color: #333;">Position *</label>
+                                <select class="form-control" id="nomineePosition" style="background: white; color: #333;">
+                                    <option value="">Select Position</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="nomineeParty" style="color: #333;">Partylist</label>
+                                <select class="form-control" id="nomineeParty" style="background: white; color: #333;">
+                                    <option value="">Independent</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <label for="nomineeMotto" style="color: #333;">Campaign Motto</label>
+                                <input type="text" class="form-control" id="nomineeMotto" placeholder="e.g., Together we achieve more" style="background: white; color: #333;">
+                            </div>
+                            <div>
+                                <label for="nomineeDesc" style="color: #333;">Description/Platform</label>
+                                <textarea class="form-control" id="nomineeDesc" rows="2" placeholder="Brief background and platform..." style="background: white; color: #333;"></textarea>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success" onclick="addNominee()">Add Nominee</button>
+                    </div>
+                    
+                    <div id="nomineesList" style="margin-top: 1rem;">
+                        <!-- Nominees will appear here -->
+                    </div>
+                </div>
+
+                <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 15px;">
+                    <h4 style="color: #E74C3C; margin-bottom: 1rem;">Ready to Create Election?</h4>
+                    <p style="color: #666; margin-bottom: 2rem;">Review your selections and click create to set up your complete election.</p>
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <button type="button" class="btn" onclick="closeCreateElectionModal()">Cancel</button>
+                        <button type="button" class="btn btn-success" onclick="createCompleteElection()">🚀 Create Election</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
+
+let electionData = {
+    selectedPositions: [],
+    newPositions: [],
+    selectedPartylists: [],
+    newPartylists: [],
+    nominees: []
+};
+
 function openCreateElectionModal() {
+    electionData = {
+        selectedPositions: [],
+        newPositions: [],
+        selectedPartylists: [],
+        newPartylists: [],
+        nominees: []
+    };
+    
+    loadExistingData();
+    
     document.getElementById('createElectionModal').style.display = 'block';
 }
 
 function closeCreateElectionModal() {
     document.getElementById('createElectionModal').style.display = 'none';
-    document.getElementById('electionForm').reset();
+    document.getElementById('electionConfigForm').reset();
+    document.getElementById('newPositionsList').innerHTML = '';
+    document.getElementById('newPartylistsList').innerHTML = '';
+    document.getElementById('nomineesList').innerHTML = '';
 }
 
-function createElection(event) {
-    event.preventDefault();
+async function loadExistingData() {
+    try {
+        const positionsResponse = await fetch('/api/all-positions');
+        const positionsData = await positionsResponse.json();
+        
+        const existingPositionsSelect = document.getElementById('existingPositions');
+        existingPositionsSelect.innerHTML = '';
+        
+        if (positionsData.positions) {
+            positionsData.positions.forEach(position => {
+                const option = document.createElement('option');
+                option.value = position.id;
+                option.textContent = `${position.title} - ${position.description || 'No description'}`;
+                existingPositionsSelect.appendChild(option);
+            });
+        }
+        
+        // Load existing partylists
+        const partylistsResponse = await fetch('/api/all-partylists');
+        const partylistsData = await partylistsResponse.json();
+        
+        const existingPartylistsSelect = document.getElementById('existingPartylists');
+        existingPartylistsSelect.innerHTML = '';
+        
+        if (partylistsData.partylists) {
+            partylistsData.partylists.forEach(party => {
+                const option = document.createElement('option');
+                option.value = party.id;
+                option.textContent = `${party.name} - ${party.description || 'No description'}`;
+                option.style.color = party.color;
+                existingPartylistsSelect.appendChild(option);
+            });
+        }
+        
+        // Update nominee dropdowns
+        updateNomineeDropdowns();
+        
+    } catch (error) {
+        console.error('Error loading existing data:', error);
+    }
+}
+
+function addNewPosition() {
+    const title = document.getElementById('newPositionTitle').value.trim();
+    const description = document.getElementById('newPositionDesc').value.trim();
+    const maxVotes = document.getElementById('newPositionMaxVotes').value;
     
-    const data = {
-        title: document.getElementById('electionTitle').value,
-        description: document.getElementById('electionDescription').value
+    if (!title) {
+        alert('Please enter a position title');
+        return;
+    }
+    
+    const position = {
+        id: 'new_' + Date.now(),
+        title: title,
+        description: description,
+        max_votes: parseInt(maxVotes),
+        isNew: true
     };
     
-    fetch('/api/elections', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('✅ Election created successfully! Now add positions and nominees.');
-            closeCreateElectionModal();
-            location.reload();
-        } else {
-            alert('❌ Error: ' + data.message);
-        }
-    })
-    .catch(error => {
-        alert('❌ Network error occurred');
+    electionData.newPositions.push(position);
+    
+    // Clear inputs
+    document.getElementById('newPositionTitle').value = '';
+    document.getElementById('newPositionDesc').value = '';
+    document.getElementById('newPositionMaxVotes').value = '1';
+    
+    updateNewPositionsList();
+    updateNomineeDropdowns();
+}
+
+function updateNewPositionsList() {
+    const container = document.getElementById('newPositionsList');
+    container.innerHTML = '';
+    
+    electionData.newPositions.forEach((position, index) => {
+        const div = document.createElement('div');
+        div.style.cssText = 'background: #d4edda; padding: 1rem; border-radius: 10px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #28a745;';
+        div.innerHTML = `
+            <div>
+                <strong>🆕 ${position.title}</strong>
+                ${position.description ? `<br><small style="color: #666;">${position.description}</small>` : ''}
+                <br><small>Max votes: ${position.max_votes}</small>
+            </div>
+            <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="removeNewPosition(${index})">Remove</button>
+        `;
+        container.appendChild(div);
     });
 }
 
+function removeNewPosition(index) {
+    electionData.newPositions.splice(index, 1);
+    updateNewPositionsList();
+    updateNomineeDropdowns();
+}
+
+function addNewPartylist() {
+    const name = document.getElementById('newPartyName').value.trim();
+    const description = document.getElementById('newPartyDesc').value.trim();
+    const color = document.getElementById('newPartyColor').value;
+    
+    if (!name) {
+        alert('Please enter a partylist name');
+        return;
+    }
+    
+    const partylist = {
+        id: 'new_' + Date.now(),
+        name: name,
+        description: description,
+        color: color,
+        isNew: true
+    };
+    
+    electionData.newPartylists.push(partylist);
+    
+    // Clear inputs
+    document.getElementById('newPartyName').value = '';
+    document.getElementById('newPartyDesc').value = '';
+    document.getElementById('newPartyColor').value = '#E74C3C';
+    
+    updateNewPartylistsList();
+    updateNomineeDropdowns();
+}
+
+function updateNewPartylistsList() {
+    const container = document.getElementById('newPartylistsList');
+    container.innerHTML = '';
+    
+    electionData.newPartylists.forEach((party, index) => {
+        const div = document.createElement('div');
+        div.style.cssText = `background: #fff3cd; padding: 1rem; border-radius: 10px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ${party.color};`;
+        div.innerHTML = `
+            <div>
+                <strong style="color: ${party.color};">🆕 ${party.name}</strong>
+                ${party.description ? `<br><small style="color: #666;">${party.description}</small>` : ''}
+            </div>
+            <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="removeNewPartylist(${index})">Remove</button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function removeNewPartylist(index) {
+    electionData.newPartylists.splice(index, 1);
+    updateNewPartylistsList();
+    updateNomineeDropdowns();
+}
+
+function updateNomineeDropdowns() {
+    const positionSelect = document.getElementById('nomineePosition');
+    const partySelect = document.getElementById('nomineeParty');
+    
+    // Update positions dropdown
+    positionSelect.innerHTML = '<option value="">Select Position</option>';
+    
+    // Add existing selected positions
+    const selectedExistingPositions = Array.from(document.getElementById('existingPositions').selectedOptions);
+    selectedExistingPositions.forEach(option => {
+        const newOption = document.createElement('option');
+        newOption.value = option.value;
+        newOption.textContent = option.textContent;
+        positionSelect.appendChild(newOption);
+    });
+    
+    // Add new positions
+    electionData.newPositions.forEach(position => {
+        const option = document.createElement('option');
+        option.value = position.id;
+        option.textContent = `🆕 ${position.title}`;
+        positionSelect.appendChild(option);
+    });
+    
+    // Update partylists dropdown
+    partySelect.innerHTML = '<option value="">Independent</option>';
+    
+    // Add existing selected partylists
+    const selectedExistingPartylists = Array.from(document.getElementById('existingPartylists').selectedOptions);
+    selectedExistingPartylists.forEach(option => {
+        const newOption = document.createElement('option');
+        newOption.value = option.value;
+        newOption.textContent = option.textContent;
+        partySelect.appendChild(newOption);
+    });
+    
+    // Add new partylists
+    electionData.newPartylists.forEach(party => {
+        const option = document.createElement('option');
+        option.value = party.id;
+        option.textContent = `🆕 ${party.name}`;
+        option.style.color = party.color;
+        partySelect.appendChild(option);
+    });
+}
+
+// Update dropdowns when existing selections change
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('existingPositions').addEventListener('change', updateNomineeDropdowns);
+    document.getElementById('existingPartylists').addEventListener('change', updateNomineeDropdowns);
+});
+
+function addNominee() {
+    const name = document.getElementById('nomineeName').value.trim();
+    const positionId = document.getElementById('nomineePosition').value;
+    const partyId = document.getElementById('nomineeParty').value;
+    const motto = document.getElementById('nomineeMotto').value.trim();
+    const description = document.getElementById('nomineeDesc').value.trim();
+    
+    if (!name) {
+        alert('Please enter nominee name');
+        return;
+    }
+    
+    if (!positionId) {
+        alert('Please select a position');
+        return;
+    }
+    
+    const nominee = {
+        id: Date.now(),
+        name: name,
+        position_id: positionId,
+        partylist_id: partyId || null,
+        motto: motto,
+        description: description
+    };
+    
+    electionData.nominees.push(nominee);
+    
+    // Clear inputs
+    document.getElementById('nomineeName').value = '';
+    document.getElementById('nomineePosition').value = '';
+    document.getElementById('nomineeParty').value = '';
+    document.getElementById('nomineeMotto').value = '';
+    document.getElementById('nomineeDesc').value = '';
+    
+    updateNomineesList();
+}
+
+function updateNomineesList() {
+    const container = document.getElementById('nomineesList');
+    container.innerHTML = '';
+    
+    electionData.nominees.forEach((nominee, index) => {
+        // Find position name
+        let positionName = 'Unknown Position';
+        const selectedPositions = Array.from(document.getElementById('existingPositions').selectedOptions);
+        const existingPosition = selectedPositions.find(opt => opt.value == nominee.position_id);
+        if (existingPosition) {
+            positionName = existingPosition.textContent.split(' - ')[0];
+        } else {
+            const newPosition = electionData.newPositions.find(p => p.id == nominee.position_id);
+            if (newPosition) {
+                positionName = `🆕 ${newPosition.title}`;
+            }
+        }
+        
+        // Find party name
+        let partyName = 'Independent';
+        let partyColor = '#666';
+        if (nominee.partylist_id) {
+            const selectedPartylists = Array.from(document.getElementById('existingPartylists').selectedOptions);
+            const existingParty = selectedPartylists.find(opt => opt.value == nominee.partylist_id);
+            if (existingParty) {
+                partyName = existingParty.textContent.split(' - ')[0];
+                partyColor = existingParty.style.color || '#666';
+            } else {
+                const newParty = electionData.newPartylists.find(p => p.id == nominee.partylist_id);
+                if (newParty) {
+                    partyName = `🆕 ${newParty.name}`;
+                    partyColor = newParty.color;
+                }
+            }
+        }
+        
+        const div = document.createElement('div');
+        div.style.cssText = 'background: #f0f8ff; padding: 1rem; border-radius: 10px; margin-bottom: 0.5rem; border-left: 4px solid #007bff;';
+        div.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <strong>${nominee.name}</strong> - ${positionName}
+                    <br><small style="color: ${partyColor};">▪ ${partyName}</small>
+                    ${nominee.motto ? `<br><em>"${nominee.motto}"</em>` : ''}
+                    ${nominee.description ? `<br><small>${nominee.description}</small>` : ''}
+                </div>
+                <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="removeNominee(${index})">Remove</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function removeNominee(index) {
+    electionData.nominees.splice(index, 1);
+    updateNomineesList();
+}
+
+async function createCompleteElection() {
+    const title = document.getElementById('electionTitle').value.trim();
+    const description = document.getElementById('electionDescription').value.trim();
+    
+    if (!title) {
+        alert('Please enter an election title');
+        return;
+    }
+    
+    try {
+        // 1. Create Election
+        const electionResponse = await fetch('/api/elections', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, description })
+        });
+        
+        const electionResult = await electionResponse.json();
+        if (!electionResult.success) throw new Error(electionResult.message);
+        
+        // 2. Create new partylists and map IDs
+        const partylistMap = {};
+        for (const party of electionData.newPartylists) {
+            const partyResponse = await fetch('/api/partylists', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: party.name,
+                    description: party.description,
+                    color: party.color
+                })
+            });
+            const partyResult = await partyResponse.json();
+            if (partyResult.success) {
+                partylistMap[party.id] = partyResult.partylist_id;
+            }
+        }
+        
+        // 3. Create new positions and map IDs
+        const positionMap = {};
+        for (const position of electionData.newPositions) {
+            const positionResponse = await fetch('/api/positions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: position.title,
+                    description: position.description,
+                    max_votes: position.max_votes
+                })
+            });
+            const positionResult = await positionResponse.json();
+            if (positionResult.success) {
+                positionMap[position.id] = positionResult.position_id;
+            }
+        }
+        
+        // 4. Create nominees
+        for (const nominee of electionData.nominees) {
+            const actualPositionId = nominee.position_id.toString().startsWith('new_') ? 
+                positionMap[nominee.position_id] : nominee.position_id;
+            
+            const actualPartylistId = nominee.partylist_id && nominee.partylist_id.toString().startsWith('new_') ? 
+                partylistMap[nominee.partylist_id] : nominee.partylist_id;
+            
+            await fetch('/api/nominees', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: nominee.name,
+                    position_id: actualPositionId,
+                    partylist_id: actualPartylistId,
+                    motto: nominee.motto,
+                    description: nominee.description
+                })
+            });
+        }
+        
+        alert('🎉 Election created successfully with all configurations!');
+        closeCreateElectionModal();
+        location.reload();
+        
+    } catch (error) {
+        alert('❌ Error creating election: ' + error.message);
+    }
+}
+
+// Other existing functions (startElection, stopElection, etc.) remain the same...
 function startElection(electionId) {
     if (confirm('🚀 Are you sure you want to start this election? Students will be able to vote.')) {
         fetch(`/admin/election/start/${electionId}`, { method: 'GET' })
@@ -245,9 +761,7 @@ function startElection(electionId) {
                     alert('❌ Error: ' + data.message);
                 }
             })
-            .catch(error => {
-                alert('❌ Network error occurred');
-            });
+            .catch(error => alert('❌ Network error occurred'));
     }
 }
 
@@ -263,21 +777,32 @@ function stopElection(electionId) {
                     alert('❌ Error: ' + data.message);
                 }
             })
-            .catch(error => {
-                alert('❌ Network error occurred');
-            });
+            .catch(error => alert('❌ Network error occurred'));
     }
 }
 
 function editElection(electionId) {
-    alert(`✏️ Edit functionality for election ${electionId} will be implemented soon.`);
+    alert('✏️ Edit functionality will be implemented soon.');
 }
 
 function deleteElection(electionId) {
     if (confirm('🗑️ Are you sure you want to delete this election? This action cannot be undone.')) {
-        alert('Election deleted successfully!');
-        location.reload();
+        fetch(`/api/elections/${electionId}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Election deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('❌ Error: ' + data.message);
+                }
+            })
+            .catch(error => alert('❌ Network error occurred'));
     }
+}
+
+function exportData() {
+    alert('📊 Export functionality will download all election data as CSV.');
 }
 
 window.addEventListener('click', function(event) {

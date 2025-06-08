@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
     <div class="card animate-fadeIn" style="text-align: center;">
-        <h1 style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;">
+        <h1 style="font-size: 3rem; color: #E74C3C; margin-bottom: 1rem;">
             🗳️ Electronic Voting System
         </h1>
         <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
@@ -56,7 +56,7 @@
     <div class="grid">
         <div class="card" style="text-align: center;">
             <div style="font-size: 2.5rem; margin-bottom: 1rem;">👥</div>
-            <h3 style="color: #667eea; margin-bottom: 0.5rem;">Registered Voters</h3>
+            <h3 style="color: #E74C3C; margin-bottom: 0.5rem;">Registered Voters</h3>
             <div style="font-size: 2rem; font-weight: bold; color: #333;">{{ total_voters or 0 }}</div>
             {% if active_election and active_election.is_active %}
             <p style="color: #28a745; font-size: 0.9rem; margin-top: 0.5rem;">✅ Eligible to vote</p>
@@ -65,21 +65,21 @@
         
         <div class="card" style="text-align: center;">
             <div style="font-size: 2.5rem; margin-bottom: 1rem;">🏆</div>
-            <h3 style="color: #667eea; margin-bottom: 0.5rem;">Candidates</h3>
+            <h3 style="color: #E74C3C; margin-bottom: 0.5rem;">Candidates</h3>
             <div style="font-size: 2rem; font-weight: bold; color: #333;">{{ total_nominees or 0 }}</div>
             <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">Running for office</p>
         </div>
         
         <div class="card" style="text-align: center;">
             <div style="font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
-            <h3 style="color: #667eea; margin-bottom: 0.5rem;">Positions</h3>
+            <h3 style="color: #E74C3C; margin-bottom: 0.5rem;">Positions</h3>
             <div style="font-size: 2rem; font-weight: bold; color: #333;">{{ total_positions or 0 }}</div>
             <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">Available offices</p>
         </div>
         
         <div class="card" style="text-align: center;">
             <div style="font-size: 2.5rem; margin-bottom: 1rem;">🗳️</div>
-            <h3 style="color: #667eea; margin-bottom: 0.5rem;">Votes Cast</h3>
+            <h3 style="color: #E74C3C; margin-bottom: 0.5rem;">Votes Cast</h3>
             <div style="font-size: 2rem; font-weight: bold; color: #333;" id="votes-counter">0</div>
             <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">And counting...</p>
         </div>
@@ -88,7 +88,7 @@
     <!-- Features Showcase -->
     <div class="grid">
         <div class="card">
-            <h3 style="color: #667eea; margin-bottom: 1rem;">🔒 Secure & Private</h3>
+            <h3 style="color: #E74C3C; margin-bottom: 1rem;">🔒 Secure & Private</h3>
             <p>State-of-the-art encryption and security measures ensure your vote remains completely private and secure. Each vote is anonymized and protected.</p>
             <ul style="margin-top: 1rem; padding-left: 1.5rem;">
                 <li>Password-protected admin access</li>
@@ -99,7 +99,7 @@
         </div>
         
         <div class="card">
-            <h3 style="color: #667eea; margin-bottom: 1rem;">📊 Real-time Results</h3>
+            <h3 style="color: #E74C3C; margin-bottom: 1rem;">📊 Real-time Results</h3>
             <p>View election results as they happen with beautiful charts and detailed analytics. Get instant insights into voter turnout and candidate performance.</p>
             <ul style="margin-top: 1rem; padding-left: 1.5rem;">
                 <li>Live vote counting</li>
@@ -110,7 +110,7 @@
         </div>
         
         <div class="card">
-            <h3 style="color: #667eea; margin-bottom: 1rem;">📱 User-Friendly</h3>
+            <h3 style="color: #E74C3C; margin-bottom: 1rem;">📱 User-Friendly</h3>
             <p>Intuitive interface designed with students and administrators in mind. Modern, responsive design that works perfectly on all devices.</p>
             <ul style="margin-top: 1rem; padding-left: 1.5rem;">
                 <li>Mobile-responsive design</li>
@@ -123,14 +123,14 @@
 
     <!-- Call to Action -->
     {% if not current_user.is_authenticated %}
-    <div class="card" style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="card" style="text-align: center; background: linear-gradient(135deg, #E74C3C 0%, #2C3E50100%); color: white;">
         <h3 style="margin-bottom: 1rem;">Ready to Participate in Democracy?</h3>
         <p style="margin-bottom: 2rem; opacity: 0.9; font-size: 1.1rem;">
             Your voice matters in shaping the future of our student community. 
             Join your fellow students in making important decisions through secure, digital voting.
         </p>
         <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <a href="{{ url_for('login') }}" class="btn" style="background: white; color: #667eea; font-weight: 600; font-size: 1.1rem; padding: 1rem 2rem;">
+            <a href="{{ url_for('login') }}" class="btn" style="background: white; color: #E74C3C; font-weight: 600; font-size: 1.1rem; padding: 1rem 2rem;">
                 Start Voting Now
             </a>
             <a href="{{ url_for('view_results') }}" class="btn" style="background: rgba(255, 255, 255, 0.2); border: 2px solid white; font-size: 1.1rem; padding: 1rem 2rem;">

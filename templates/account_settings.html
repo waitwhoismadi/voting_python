@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%); color: white;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚙️ Account Settings</h1>
+        <p>Manage your account information and preferences</p>
+    </div>
+
+    <div class="card">
+        <h3 style="color: var(--primary-color); margin-bottom: 1.5rem;">👤 Profile Information</h3>
+        
+        <form id="accountForm" onsubmit="updateAccount(event)">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" value="{{ current_user.username }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" class="form-control" id="email" value="{{ current_user.email }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="newPassword">New Password (leave blank to keep current)</label>
+                <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">Confirm New Password</label>
+                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button type="submit" class="btn btn-success">💾 Save Changes</button>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn">← Back to Dashboard</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateAccount(event) {
+    event.preventDefault();
+    
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (newPassword && newPassword !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+    }
+    
+    const data = {
+        username: document.getElementById('username').value,
+        email: document.getElementById('email').value
+    };
+    
+    if (newPassword) {
+        data.password = newPassword;
+    }
+    
+    fetch('/admin/account', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Account updated successfully!');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Network error occurred');
+    });
+}
+</script>
+{% endblock %}

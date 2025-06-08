@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Electronic Voting System{% endblock %}</title>
+
     <style>
         * {
             margin: 0;
@@ -13,7 +14,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
             min-height: 100vh;
             color: #333;
         }
@@ -79,6 +80,7 @@
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
+            color: #333; 
         }
 
         .card:hover {
@@ -87,7 +89,7 @@
         }
 
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
             color: white;
             border: none;
             padding: 0.75rem 2rem;
@@ -106,11 +108,11 @@
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            background: linear-gradient(135deg, #27AE60 0%, #229954 100%);
         }
 
         .form-group {
@@ -131,12 +133,25 @@
             border-radius: 10px;
             font-size: 1rem;
             transition: border-color 0.3s ease;
+            background: white;
+            color: #333;
         }
 
         .form-control:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #E74C3C;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+            background: white;
+            color: #333;
+        }
+
+        .form-control::placeholder {
+            color: #6c757d;
+        }
+
+        .modal-content {
+            background: white;
+            color: #333;
         }
 
         .alert {
@@ -199,6 +214,18 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        select.form-control {
+            color: #333;
+            background: white;
+        }
+
+        select.form-control option {
+            color: #333;
+            background: white;
+        }
+
+
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -211,6 +238,7 @@
                 {% if current_user.is_authenticated %}
                     {% if current_user.is_admin %}
                         <li><a href="{{ url_for('admin_dashboard') }}">Admin Panel</a></li>
+                        <li><a href="{{ url_for('manage_account') }}">⚙️ Settings</a></li>
                     {% else %}
                         <li><a href="{{ url_for('voter_dashboard') }}">My Dashboard</a></li>
                     {% endif %}
