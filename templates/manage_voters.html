@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Voters - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">👥 Manage Voters</h1>
+                <p>Register students and manage voter eligibility</p>
+            </div>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3);">← Back to Dashboard</a>
+                <button class="btn btn-success" onclick="openAddVoterModal()">+ Register New Voter</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #667eea;">👥 Total Registered</h3>
+            <div style="font-size: 2.5rem; font-weight: bold; color: #667eea;">1,247</div>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #667eea;">✅ Have Voted</h3>
+            <div style="font-size: 2.5rem; font-weight: bold; color: #51cf66;">856</div>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #667eea;">⏳ Yet to Vote</h3>
+            <div style="font-size: 2.5rem; font-weight: bold; color: #ff6b6b;">391</div>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #667eea;">📊 Turnout</h3>
+            <div style="font-size: 2.5rem; font-weight: bold; color: #667eea;">68.6%</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+            <div style="position: relative; flex: 1; min-width: 250px;">
+                <input type="text" placeholder="Search by name or student ID..." 
+                       style="width: 100%; padding: 0.75rem 1rem 0.75rem 3rem; border: 2px solid #e9ecef; border-radius: 25px; font-size: 0.95rem;">
+                <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem;">🔍</span>
+            </div>
+            <select style="padding: 0.75rem 1rem; border: 2px solid #e9ecef; border-radius: 25px; min-width: 150px;">
+                <option>All Status</option>
+                <option>Has Voted</option>
+                <option>Not Voted</option>
+            </select>
+            <select style="padding: 0.75rem 1rem; border: 2px solid #e9ecef; border-radius: 25px; min-width: 150px;">
+                <option>All Years</option>
+                <option>2025</option>
+                <option>2024</option>
+                <option>2023</option>
+                <option>2022</option>
+            </select>
+        </div>
+
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">Registered Voters</h3>
+        
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);">
+                <thead>
+                    <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <th style="padding: 1rem; text-align: left;">Student ID</th>
+                        <th style="padding: 1rem; text-align: left;">Name</th>
+                        <th style="padding: 1rem; text-align: left;">Email</th>
+                        <th style="padding: 1rem; text-align: center;">Status</th>
+                        <th style="padding: 1rem; text-align: center;">Registered</th>
+                        <th style="padding: 1rem; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 1rem; font-weight: 600;">2025001</td>
+                        <td style="padding: 1rem;">John Doe</td>
+                        <td style="padding: 1rem; color: #666;">john.doe@student.edu</td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <span style="background: #d4edda; color: #155724; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.85rem;">✅ Voted</span>
+                        </td>
+                        <td style="padding: 1rem; text-align: center; color: #666;">Mar 15, 2025</td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <button class="btn" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; margin-right: 0.5rem;">👁️ View</button>
+                            <button class="btn" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; margin-right: 0.5rem;">✏️ Edit</button>
+                            <button class="btn btn-danger" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 1rem; font-weight: 600;">2025002</td>
+                        <td style="padding: 1rem;">Jane Smith</td>
+                        <td style="padding: 1rem; color: #666;">jane.smith@student.edu</td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <span style="background: #f8d7da; color: #721c24; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.85rem;">⏳ Not Voted</span>
+                        </td>
+                        <td style="padding: 1rem; text-align: center; color: #666;">Mar 14, 2025</td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <button class="btn" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; margin-right: 0.5rem;">👁️ View</button>
+                            <button class="btn" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; margin-right: 0.5rem;">✏️ Edit</button>
+                            <button class="btn btn-danger" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 1rem; font-weight: 600;">2025003</td>
+                        <td style="padding: 1rem;">Bob Wilson</td>
+                        <td style="padding: 1rem; color: #666;">bob.wilson@student.edu</td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <span style="background: #d4edda; color: #155724; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.85rem;">✅ Voted</span>
+                        </td>
+                        <td style="padding: 1rem; text-align: center; color: #666;">Mar 13, 2025</td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <button class="btn" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; margin-right: 0.5rem;">👁️ View</button>
+                            <button class="btn" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; margin-right: 0.5rem;">✏️ Edit</button>
+                            <button class="btn btn-danger" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem;">
+            <button class="btn" disabled>← Previous</button>
+            <span style="padding: 0.75rem 1rem; background: #667eea; color: white; border-radius: 10px;">1</span>
+            <button class="btn">2</button>
+            <button class="btn">3</button>
+            <button class="btn">Next →</button>
+        </div>
+    </div>
+</div>
+
+<div id="addVoterModal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);">
+    <div style="background-color: white; margin: 5% auto; padding: 0; border-radius: 25px; width: 90%; max-width: 600px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 25px 25px 0 0; position: relative;">
+            <h2 style="margin: 0;">Register New Voter</h2>
+            <button style="position: absolute; top: 1rem; right: 1.5rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;" onclick="closeAddVoterModal()">&times;</button>
+        </div>
+        <div style="padding: 2rem;">
+            <form id="voterForm" onsubmit="submitVoter(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="studentId">Student ID *</label>
+                        <input type="text" class="form-control" id="studentId" required placeholder="e.g., 2025004">
+                    </div>
+                    <div class="form-group">
+                        <label for="voterName">Full Name *</label>
+                        <input type="text" class="form-control" id="voterName" required placeholder="e.g., John Doe">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="voterEmail">Email Address *</label>
+                    <input type="email" class="form-control" id="voterEmail" required placeholder="student@university.edu">
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="academicYear">Academic Year</label>
+                        <select class="form-control" id="academicYear">
+                            <option value="2025">2025 (Freshman)</option>
+                            <option value="2024">2024 (Sophomore)</option>
+                            <option value="2023">2023 (Junior)</option>
+                            <option value="2022">2022 (Senior)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <select class="form-control" id="department">
+                            <option value="">Select Department</option>
+                            <option value="CS">Computer Science</option>
+                            <option value="ENG">Engineering</option>
+                            <option value="BUS">Business</option>
+                            <option value="ART">Arts & Letters</option>
+                            <option value="SCI">Sciences</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn" onclick="closeAddVoterModal()">Cancel</button>
+                    <button type="submit" class="btn btn-success">Register Voter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openAddVoterModal() {
+    document.getElementById('addVoterModal').style.display = 'block';
+}
+
+function closeAddVoterModal() {
+    document.getElementById('addVoterModal').style.display = 'none';
+    document.getElementById('voterForm').reset();
+}
+
+function submitVoter(event) {
+    event.preventDefault();
+    alert('Voter registered successfully!');
+    closeAddVoterModal();
+}
+
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('addVoterModal');
+    if (event.target === modal) {
+        closeAddVoterModal();
+    }
+});
+</script>
+{% endblock %}

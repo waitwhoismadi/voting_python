@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Electronic Voting System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card animate-fadeIn" style="text-align: center;">
+        <h1 style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;">
+            🗳️ Electronic Voting System
+        </h1>
+        <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
+            Secure, transparent, and efficient digital voting platform for student elections.
+        </p>
+        
+        {% if active_election %}
+        <div style="background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%); padding: 2rem; border-radius: 15px; margin: 2rem 0; border-left: 5px solid #28a745;">
+            <h3 style="color: #155724; margin-bottom: 1rem;">🎯 {{ active_election.title }}</h3>
+            <p style="color: #155724; margin-bottom: 1rem;">{{ active_election.description }}</p>
+            {% if active_election.is_active %}
+                <div style="background: #28a745; color: white; padding: 0.75rem 1.5rem; border-radius: 20px; display: inline-block; font-weight: 600;">
+                    🟢 VOTING NOW OPEN
+                </div>
+                {% if active_election.start_time %}
+                <p style="color: #155724; margin-top: 1rem; font-size: 0.9rem;">
+                    Started: {{ active_election.start_time.strftime('%B %d, %Y at %I:%M %p') }}
+                </p>
+                {% endif %}
+            {% else %}
+                <div style="background: #6c757d; color: white; padding: 0.75rem 1.5rem; border-radius: 20px; display: inline-block; font-weight: 600;">
+                    ⏸️ Election Scheduled
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('login') }}" class="btn" style="font-size: 1.1rem; padding: 1rem 2rem;">🎓 Student Login</a>
+                <a href="{{ url_for('login') }}" class="btn" style="font-size: 1.1rem; padding: 1rem 2rem;">👨‍💼 Admin Login</a>
+            {% else %}
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn" style="font-size: 1.1rem; padding: 1rem 2rem;">📊 Admin Dashboard</a>
+                {% else %}
+                    {% if active_election and active_election.is_active and not current_user.has_voted %}
+                        <a href="{{ url_for('voter_dashboard') }}" class="btn btn-success" style="font-size: 1.1rem; padding: 1rem 2rem; animation: pulse 2s infinite;">🗳️ VOTE NOW</a>
+                    {% else %}
+                        <a href="{{ url_for('voter_dashboard') }}" class="btn" style="font-size: 1.1rem; padding: 1rem 2rem;">🗳️ Voting Portal</a>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            <a href="{{ url_for('view_results') }}" class="btn btn-success" style="font-size: 1.1rem; padding: 1rem 2rem;">📈 View Results</a>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="grid">
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">👥</div>
+            <h3 style="color: #667eea; margin-bottom: 0.5rem;">Registered Voters</h3>
+            <div style="font-size: 2rem; font-weight: bold; color: #333;">{{ total_voters or 0 }}</div>
+            {% if active_election and active_election.is_active %}
+            <p style="color: #28a745; font-size: 0.9rem; margin-top: 0.5rem;">✅ Eligible to vote</p>
+            {% endif %}
+        </div>
+        
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🏆</div>
+            <h3 style="color: #667eea; margin-bottom: 0.5rem;">Candidates</h3>
+            <div style="font-size: 2rem; font-weight: bold; color: #333;">{{ total_nominees or 0 }}</div>
+            <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">Running for office</p>
+        </div>
+        
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
+            <h3 style="color: #667eea; margin-bottom: 0.5rem;">Positions</h3>
+            <div style="font-size: 2rem; font-weight: bold; color: #333;">{{ total_positions or 0 }}</div>
+            <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">Available offices</p>
+        </div>
+        
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🗳️</div>
+            <h3 style="color: #667eea; margin-bottom: 0.5rem;">Votes Cast</h3>
+            <div style="font-size: 2rem; font-weight: bold; color: #333;" id="votes-counter">0</div>
+            <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">And counting...</p>
+        </div>
+    </div>
+
+    <!-- Features Showcase -->
+    <div class="grid">
+        <div class="card">
+            <h3 style="color: #667eea; margin-bottom: 1rem;">🔒 Secure & Private</h3>
+            <p>State-of-the-art encryption and security measures ensure your vote remains completely private and secure. Each vote is anonymized and protected.</p>
+            <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                <li>Password-protected admin access</li>
+                <li>Student ID verification</li>
+                <li>One vote per student enforcement</li>
+                <li>Secure database storage</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h3 style="color: #667eea; margin-bottom: 1rem;">📊 Real-time Results</h3>
+            <p>View election results as they happen with beautiful charts and detailed analytics. Get instant insights into voter turnout and candidate performance.</p>
+            <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                <li>Live vote counting</li>
+                <li>Interactive result displays</li>
+                <li>Turnout tracking</li>
+                <li>Export capabilities</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h3 style="color: #667eea; margin-bottom: 1rem;">📱 User-Friendly</h3>
+            <p>Intuitive interface designed with students and administrators in mind. Modern, responsive design that works perfectly on all devices.</p>
+            <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                <li>Mobile-responsive design</li>
+                <li>Easy candidate browsing</li>
+                <li>Simple voting process</li>
+                <li>Clear instructions</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    {% if not current_user.is_authenticated %}
+    <div class="card" style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <h3 style="margin-bottom: 1rem;">Ready to Participate in Democracy?</h3>
+        <p style="margin-bottom: 2rem; opacity: 0.9; font-size: 1.1rem;">
+            Your voice matters in shaping the future of our student community. 
+            Join your fellow students in making important decisions through secure, digital voting.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('login') }}" class="btn" style="background: white; color: #667eea; font-weight: 600; font-size: 1.1rem; padding: 1rem 2rem;">
+                Start Voting Now
+            </a>
+            <a href="{{ url_for('view_results') }}" class="btn" style="background: rgba(255, 255, 255, 0.2); border: 2px solid white; font-size: 1.1rem; padding: 1rem 2rem;">
+                View Live Results
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- System Status -->
+    <div class="card" style="background: #f8f9fa; border-left: 5px solid #17a2b8;">
+        <h4 style="color: #17a2b8; margin-bottom: 1rem;">🔧 System Status</h4>
+        <div class="grid">
+            <div style="text-align: center;">
+                <div style="color: #28a745; font-size: 1.5rem; margin-bottom: 0.5rem;">✅</div>
+                <div style="font-weight: 600;">Voting System</div>
+                <div style="color: #28a745; font-size: 0.9rem;">Operational</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="color: #28a745; font-size: 1.5rem; margin-bottom: 0.5rem;">✅</div>
+                <div style="font-weight: 600;">Database</div>
+                <div style="color: #28a745; font-size: 0.9rem;">Connected</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="color: #28a745; font-size: 1.5rem; margin-bottom: 0.5rem;">✅</div>
+                <div style="font-weight: 600;">Security</div>
+                <div style="color: #28a745; font-size: 0.9rem;">Active</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="color: #28a745; font-size: 1.5rem; margin-bottom: 0.5rem;">✅</div>
+                <div style="font-weight: 600;">Uptime</div>
+                <div style="color: #28a745; font-size: 0.9rem;">99.9%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animate vote counter
+document.addEventListener('DOMContentLoaded', function() {
+    const counter = document.getElementById('votes-counter');
+    const targetValue = {{ votes_cast or 0 }};
+    
+    if (counter && targetValue > 0) {
+        let currentValue = 0;
+        const increment = Math.ceil(targetValue / 50);
+        const timer = setInterval(() => {
+            currentValue += increment;
+            if (currentValue >= targetValue) {
+                currentValue = targetValue;
+                clearInterval(timer);
+            }
+            counter.textContent = currentValue.toLocaleString();
+        }, 50);
+    }
+
+    // Add staggered animation to feature cards
+    const featureCards = document.querySelectorAll('.grid .card');
+    featureCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+
+    // Initially hide cards for animation
+    featureCards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'all 0.6s ease';
+    });
+});
+</script>
+{% endblock %}

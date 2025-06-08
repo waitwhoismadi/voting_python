@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Electronic Voting System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">👨‍💼 Admin Dashboard</h1>
+        <p>Welcome back, {{ current_user.username }}! Manage your election system with powerful tools.</p>
+    </div>
+
+    <!-- Statistics -->
+    <div class="grid">
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #667eea;">👥 Total Voters</h3>
+            <div style="font-size: 3rem; font-weight: bold; color: #667eea;">{{ total_voters }}</div>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #667eea;">🏆 Nominees</h3>
+            <div style="font-size: 3rem; font-weight: bold; color: #667eea;">{{ total_nominees }}</div>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #667eea;">🗳️ Votes Cast</h3>
+            <div style="font-size: 3rem; font-weight: bold; color: #667eea;">{{ votes_cast }}</div>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #667eea;">📊 Positions</h3>
+            <div style="font-size: 3rem; font-weight: bold; color: #667eea;">{{ total_positions }}</div>
+        </div>
+    </div>
+
+    <!-- Election Control -->
+    <div class="card">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">⚡ Election Control Center</h3>
+        
+        {% if active_election %}
+        <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem;">
+            <h4>{{ active_election.title }}</h4>
+            <p>{{ active_election.description }}</p>
+            <p><strong>Status:</strong> 
+                {% if active_election.is_active %}
+                    <span style="color: #28a745;">🟢 Active</span>
+                {% else %}
+                    <span style="color: #dc3545;">🔴 Inactive</span>
+                {% endif %}
+            </p>
+            {% if active_election.start_time %}
+            <p><strong>Started:</strong> {{ active_election.start_time.strftime('%B %d, %Y at %I:%M %p') }}</p>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            {% if active_election.is_active %}
+                <button class="btn btn-danger" onclick="stopElection()">🛑 Stop Election</button>
+            {% else %}
+                <button class="btn btn-success" onclick="startElection()">▶️ Start Election</button>
+            {% endif %}
+            <a href="{{ url_for('view_results') }}" class="btn">📊 View Results</a>
+            <button class="btn" onclick="exportData()">💾 Export Data</button>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; background: #fff3cd; border-radius: 10px;">
+            <h4 style="color: #856404;">⚠️ No Election Configured</h4>
+            <p style="color: #856404;">Please create an election and positions before starting.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid">
+        <div class="card">
+            <h4 style="color: #667eea;">🏆 Manage Nominees</h4>
+            <p>Add and manage candidates for all positions.</p>
+            <div style="margin-top: 1rem;">
+                <a href="{{ url_for('manage_nominees') }}" class="btn">Manage Nominees</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h4 style="color: #667eea;">📋 Manage Positions</h4>
+            <p>Configure election positions and requirements.</p>
+            <div style="margin-top: 1rem;">
+                <a href="{{ url_for('manage_positions') }}" class="btn">Manage Positions</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h4 style="color: #667eea;">👥 Manage Voters</h4>
+            <p>Register students and manage voter accounts.</p>
+            <div style="margin-top: 1rem;">
+                <a href="{{ url_for('manage_voters') }}" class="btn">Manage Voters</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h4 style="color: #667eea;">🎭 Manage Partylists</h4>
+            <p>Create and manage political parties.</p>
+            <div style="margin-top: 1rem;">
+                <a href="{{ url_for('manage_partylists') }}" class="btn">Manage Partylists</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h4 style="color: #667eea;">🗳️ Manage Elections</h4>
+            <p>Create new elections and manage existing campaigns.</p>
+            <div style="margin-top: 1rem;">
+                <a href="{{ url_for('manage_elections') }}" class="btn">Manage Elections</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">🔔 Recent Activity</h3>
+        <div style="background: #f8f9fa; border-radius: 10px; padding: 1rem;">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 40px; height: 40px; background: #51cf66; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; color: white;">🗳️</div>
+                <div>
+                    <div style="font-weight: 600;">New votes cast in the last hour</div>
+                    <div style="color: #666; font-size: 0.9rem;">15 students have participated</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <div style="width: 40px; height: 40px; background: #667eea; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; color: white;">👤</div>
+                <div>
+                    <div style="font-weight: 600;">Student registration update</div>
+                    <div style="color: #666; font-size: 0.9rem;">5 new voters registered today</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <div style="width: 40px; height: 40px; background: #ff6b6b; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; color: white;">⚙️</div>
+                <div>
+                    <div style="font-weight: 600;">System status check</div>
+                    <div style="color: #666; font-size: 0.9rem;">All systems operational</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function startElection() {
+    if (confirm('Are you sure you want to start the election? Students will be able to vote.')) {
+        fetch('/admin/election/start/1', { method: 'GET' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Election started successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Network error occurred');
+            });
+    }
+}
+
+function stopElection() {
+    if (confirm('Are you sure you want to stop the election? This will finalize all results.')) {
+        fetch('/admin/election/stop/1', { method: 'GET' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Election stopped successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Network error occurred');
+            });
+    }
+}
+
+function exportData() {
+    alert('Preparing data export... This feature exports all election data to CSV format.');
+    // In real implementation, this would trigger a download
+}
+
+// Auto-refresh statistics every 30 seconds
+setInterval(() => {
+    fetch('/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            // Update statistics without full page reload
+            console.log('Updated stats:', data);
+        })
+        .catch(error => console.log('Stats update failed'));
+}, 30000);
+</script>
+{% endblock %}

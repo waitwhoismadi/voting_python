@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Nominees - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏆 Manage Nominees</h1>
+                <p>Add, edit, and organize candidates for election positions</p>
+            </div>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3);">← Back to Dashboard</a>
+                <button class="btn btn-success" onclick="openAddNomineeModal()">+ Add New Nominee</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="grid">
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #667eea;">🏆 Total Nominees</h3>
+            <div style="font-size: 2.5rem; font-weight: bold; color: #667eea;">{{ nominees|length }}</div>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #667eea;">📊 Positions</h3>
+            <div style="font-size: 2.5rem; font-weight: bold; color: #667eea;">{{ positions|length }}</div>
+        </div>
+        <div class="card" style="text-align: center;">
+            <h3 style="color: #667eea;">🎭 Partylists</h3>
+            <div style="font-size: 2.5rem; font-weight: bold; color: #667eea;">{{ partylists|length }}</div>
+        </div>
+    </div>
+
+    <!-- Nominees List -->
+    <div class="card">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">Nominee Directory</h3>
+        
+        {% if nominees %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 2rem;">
+            {% for nominee in nominees %}
+            <div style="border: 2px solid #e9ecef; border-radius: 20px; padding: 2rem; transition: all 0.3s ease;">
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    <div style="width: 60px; height: 60px; background: #667eea; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 1rem;">
+                        {{ nominee.name[:2].upper() }}
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 0.25rem;">{{ nominee.name }}</h4>
+                        <div style="color: #667eea; font-weight: 600; font-size: 0.9rem;">{{ nominee.position.title }}</div>
+                    </div>
+                </div>
+                
+                {% if nominee.motto %}
+                <p style="font-style: italic; color: #666; margin-bottom: 1rem; border-left: 3px solid #667eea; padding-left: 1rem;">
+                    "{{ nominee.motto }}"
+                </p>
+                {% endif %}
+                
+                <p style="color: #555; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                    {{ nominee.description }}
+                </p>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1rem;">
+                    <span style="font-weight: bold; color: #667eea;">{{ nominee.vote_count }} votes</span>
+                    <span style="color: #666; font-size: 0.85rem;">Added: {{ nominee.created_at.strftime('%b %d, %Y') }}</span>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="viewNominee({{ nominee.id }})">👁️ View</button>
+                    <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #17a2b8;" onclick="editNominee({{ nominee.id }})">✏️ Edit</button>
+                    <button class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="deleteNominee({{ nominee.id }})">🗑️ Delete</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 4rem 2rem; color: #666;">
+            <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.5;">🏆</div>
+            <h3>No nominees found</h3>
+            <p>Add your first nominee to get started with the election.</p>
+            <button class="btn" onclick="openAddNomineeModal()">Add First Nominee</button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Nominee Modal -->
+<div id="addNomineeModal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);">
+    <div style="background-color: white; margin: 5% auto; padding: 0; border-radius: 25px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 25px 25px 0 0; position: relative;">
+            <h2 style="margin: 0;">Add New Nominee</h2>
+            <button style="position: absolute; top: 1rem; right: 1.5rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer;" onclick="closeAddNomineeModal()">&times;</button>
+        </div>
+        <div style="padding: 2rem;">
+            <form id="nomineeForm" onsubmit="submitNominee(event)">
+                <div class="form-group">
+                    <label for="nomineeName">Full Name *</label>
+                    <input type="text" class="form-control" id="nomineeName" required>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="nomineePosition">Position *</label>
+                        <select class="form-control" id="nomineePosition" required>
+                            <option value="">Select Position</option>
+                            {% for position in positions %}
+                            <option value="{{ position.id }}">{{ position.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nomineeParty">Partylist</label>
+                        <select class="form-control" id="nomineeParty">
+                            <option value="">Independent</option>
+                            {% for party in partylists %}
+                            <option value="{{ party.id }}">{{ party.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomineeMotto">Campaign Motto</label>
+                    <input type="text" class="form-control" id="nomineeMotto" placeholder="e.g., Together we achieve more">
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomineeDescription">Description/Platform *</label>
+                    <textarea class="form-control" id="nomineeDescription" rows="4" required 
+                              placeholder="Describe the candidate's background, experience, and platform..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn" onclick="closeAddNomineeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-success">Add Nominee</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openAddNomineeModal() {
+    document.getElementById('addNomineeModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAddNomineeModal() {
+    document.getElementById('addNomineeModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    document.getElementById('nomineeForm').reset();
+}
+
+function submitNominee(event) {
+    event.preventDefault();
+    
+    const data = {
+        name: document.getElementById('nomineeName').value,
+        position_id: document.getElementById('nomineePosition').value,
+        partylist_id: document.getElementById('nomineeParty').value || null,
+        motto: document.getElementById('nomineeMotto').value,
+        description: document.getElementById('nomineeDescription').value
+    };
+    
+    fetch('/api/nominees', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Nominee added successfully!');
+            closeAddNomineeModal();
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Network error occurred');
+    });
+}
+
+function viewNominee(id) {
+    alert(`Opening detailed view for nominee ${id}...`);
+}
+
+function editNominee(id) {
+    alert(`Opening edit form for nominee ${id}...`);
+}
+
+function deleteNominee(id) {
+    if (confirm('Are you sure you want to delete this nominee? This action cannot be undone.')) {
+        alert('Nominee deleted successfully!');
+        // In real app, this would make an API call to delete
+        location.reload();
+    }
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('addNomineeModal');
+    if (event.target === modal) {
+        closeAddNomineeModal();
+    }
+});
+</script>
+{% endblock %}

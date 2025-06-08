@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Error {{ error_code }} - Electronic Voting System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="text-align: center; padding: 4rem 2rem; min-height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+        <div style="font-size: 8rem; margin-bottom: 1rem; opacity: 0.3;">
+            {% if error_code == 404 %}🔍{% elif error_code == 500 %}⚠️{% else %}❌{% endif %}
+        </div>
+        
+        <h1 style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;">
+            Error {{ error_code }}
+        </h1>
+        
+        <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
+            {{ error_message }}
+        </p>
+        
+        {% if error_code == 404 %}
+        <p style="color: #888; margin-bottom: 2rem;">
+            The page you're looking for might have been moved, deleted, or you entered the wrong URL.
+        </p>
+        {% elif error_code == 500 %}
+        <p style="color: #888; margin-bottom: 2rem;">
+            Something went wrong on our end. Our team has been notified and is working to fix this issue.
+        </p>
+        {% endif %}
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('index') }}" class="btn">🏠 Go Home</a>
+            
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn">📊 Admin Dashboard</a>
+                {% else %}
+                    <a href="{{ url_for('voter_dashboard') }}" class="btn">🗳️ Voting Portal</a>
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn">🔐 Login</a>
+            {% endif %}
+            
+            <a href="{{ url_for('view_results') }}" class="btn btn-success">📈 View Results</a>
+        </div>
+        
+        {% if error_code == 500 %}
+        <div style="margin-top: 3rem; padding: 1.5rem; background: #f8f9fa; border-radius: 10px; max-width: 600px; margin-left: auto; margin-right: auto;">
+            <h4 style="color: #667eea; margin-bottom: 1rem;">Report This Issue</h4>
+            <p style="color: #666; font-size: 0.9rem;">
+                If you continue to experience problems, please contact the system administrator 
+                with the following information:
+            </p>
+            <ul style="color: #666; font-size: 0.85rem; text-align: left; margin-top: 1rem;">
+                <li>Time: {{ moment().format('YYYY-MM-DD HH:mm:ss') }}</li>
+                <li>Page: {{ request.url }}</li>
+                <li>User Agent: {{ request.headers.get('User-Agent', 'Unknown') }}</li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
