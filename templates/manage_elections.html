@@ -20,7 +20,7 @@
 </style>
 
 <div class="container">
-    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50100%); color: white;">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50); color: white;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
                 <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">🗳️ Manage Elections</h1>
@@ -172,8 +172,6 @@
 </div>
 </div>
 
-<!-- Create Election Modal -->
-<!-- Create Election Wizard Modal -->
 <div id="createElectionModal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);">
     <div style="background-color: white; margin: 2% auto; padding: 0; border-radius: 25px; width: 95%; max-width: 900px; max-height: 90vh; overflow-y: auto;">
         <div style="background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%); color: white; padding: 2rem; border-radius: 25px 25px 0 0; position: relative;">
@@ -184,7 +182,6 @@
         
         <div style="padding: 2rem;">
             <form id="electionConfigForm">
-                <!-- Basic Election Info -->
                 <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem;">
                     <h3 style="color: #E74C3C; margin-bottom: 1.5rem;">📝 Election Information</h3>
                     
@@ -199,18 +196,17 @@
                     </div>
                 </div>
 
-                <!-- Positions Section -->
                 <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem;">
                     <h3 style="color: #E74C3C; margin-bottom: 1.5rem;">📋 Election Positions</h3>
                     
                     <div class="form-group">
                         <label style="color: #333;">Select Existing Positions (hold Ctrl/Cmd for multiple)</label>
                         <select multiple class="form-control" id="existingPositions" style="height: 120px; background: white; color: #333;">
-                            <!-- Options will be populated -->
                         </select>
                         <small style="color: #666;">Selected positions will be used in this election</small>
                     </div>
                     
+                    <!-- Add New Position -->
                     <div style="border: 2px dashed #ccc; padding: 1rem; border-radius: 10px; margin-top: 1rem; background: white;">
                         <h5 style="color: #666; margin-bottom: 1rem;">+ Add New Position</h5>
                         <div style="display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 1rem; align-items: end;">
@@ -234,23 +230,26 @@
                         </div>
                     </div>
                     
+                    <!-- New Positions List -->
                     <div id="newPositionsList" style="margin-top: 1rem;">
                         <!-- New positions will appear here -->
                     </div>
                 </div>
 
                 <!-- Partylists Section -->
-                 <div style="background: #fff3cd; padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem;">
+                <div style="background: #fff3cd; padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem;">
                     <h3 style="color: #E74C3C; margin-bottom: 1.5rem;">🎭 Partylists (Optional)</h3>
                     
+                    <!-- Existing Partylists -->
                     <div class="form-group">
                         <label style="color: #333;">Select Existing Partylists (hold Ctrl/Cmd for multiple)</label>
                         <select multiple class="form-control" id="existingPartylists" style="height: 100px; background: white; color: #333;">
-                            <!-- Options will be populated -->
+                            <!-- Will be populated via AJAX -->
                         </select>
                         <small style="color: #666;">Selected partylists will be available for nominees</small>
                     </div>
                     
+                    <!-- Add New Partylist -->
                     <div style="border: 2px dashed #ccc; padding: 1rem; border-radius: 10px; margin-top: 1rem; background: white;">
                         <h5 style="color: #666; margin-bottom: 1rem;">+ Add New Partylist</h5>
                         <div style="display: grid; grid-template-columns: 2fr 2fr 1fr auto; gap: 1rem; align-items: end;">
@@ -270,6 +269,7 @@
                         </div>
                     </div>
                     
+                    <!-- New Partylists List -->
                     <div id="newPartylistsList" style="margin-top: 1rem;">
                         <!-- New partylists will appear here -->
                     </div>
@@ -279,6 +279,7 @@
                 <div style="background: #e1ecf4; padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem;">
                     <h3 style="color: #E74C3C; margin-bottom: 1.5rem;">🏆 Nominees/Candidates</h3>
                     
+                    <!-- Add Nominees -->
                     <div style="border: 2px dashed #ccc; padding: 1rem; border-radius: 10px; background: white;">
                         <h5 style="color: #666; margin-bottom: 1rem;">+ Add Nominees</h5>
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
@@ -312,11 +313,13 @@
                         <button type="button" class="btn btn-success" onclick="addNominee()">Add Nominee</button>
                     </div>
                     
+                    <!-- Nominees List -->
                     <div id="nomineesList" style="margin-top: 1rem;">
                         <!-- Nominees will appear here -->
                     </div>
                 </div>
 
+                <!-- Action Buttons -->
                 <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 15px;">
                     <h4 style="color: #E74C3C; margin-bottom: 1rem;">Ready to Create Election?</h4>
                     <p style="color: #666; margin-bottom: 2rem;">Review your selections and click create to set up your complete election.</p>
@@ -329,7 +332,6 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
@@ -406,6 +408,20 @@ async function loadExistingData() {
         console.error('Error loading existing data:', error);
     }
 }
+
+// Add this to the DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', function() {
+    // Only add event listeners if the elements exist
+    const existingPositions = document.getElementById('existingPositions');
+    const existingPartylists = document.getElementById('existingPartylists');
+    
+    if (existingPositions) {
+        existingPositions.addEventListener('change', updateNomineeDropdowns);
+    }
+    if (existingPartylists) {
+        existingPartylists.addEventListener('change', updateNomineeDropdowns);
+    }
+});
 
 function addNewPosition() {
     const title = document.getElementById('newPositionTitle').value.trim();

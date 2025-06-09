@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50100%); color: white;">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50); color: white;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
                 <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">📋 Manage Positions</h1>
@@ -28,7 +28,11 @@
                     <div style="flex: 1;">
                         <h4 style="color: #E74C3C; margin-bottom: 0.5rem;">{{ position.title }}</h4>
                         <p style="color: #666; margin-bottom: 0.5rem;">{{ position.description or 'No description provided' }}</p>
-                        <p style="font-size: 0.9rem; color: #888;">Max votes per voter: {{ position.max_votes }} | Nominees: {{ position.nominees|length }}</p>
+                        <p style="font-size: 0.9rem; color: #888;">
+                            Election: <strong>{{ position.election.title }}</strong> | 
+                            Max votes: {{ position.max_votes }} | 
+                            Nominees: {{ position.nominees|length }}
+                        </p>
                     </div>
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="editPosition({{ position.id }})">✏️ Edit</button>
@@ -112,7 +116,8 @@ function submitPosition(event) {
     const data = {
         title: document.getElementById('positionTitle').value,
         description: document.getElementById('positionDescription').value,
-        max_votes: document.getElementById('maxVotes').value
+        max_votes: document.getElementById('maxVotes').value,
+        election_id: document.getElementById('positionElection').value
     };
     
     const url = editingPositionId ? `/api/positions/${editingPositionId}` : '/api/positions';

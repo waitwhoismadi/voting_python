@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50100%); color: white;">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50); color: white;">
         <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">👨‍💼 Admin Dashboard</h1>
         <p>Welcome back, {{ current_user.username }}! Manage your election system with powerful tools.</p>
     </div>
@@ -63,6 +63,28 @@
             <h4 style="color: #856404;">⚠️ No Election Configured</h4>
             <p style="color: #856404;">Please create an election and positions before starting.</p>
         </div>
+
+        {% set total_nominees = 0 %}
+        {% for position in active_election.positions %}
+            {% set total_nominees = total_nominees + position.nominees|length %}
+        {% endfor %}
+        
+        {% if active_election.positions|length == 0 %}
+        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 1rem; margin-top: 1rem;">
+            <div style="color: #856404; font-weight: 600;">⚠️ Election Needs Setup</div>
+            <div style="color: #856404; font-size: 0.9rem; margin-top: 0.5rem;">This election has no positions configured.</div>
+            <div style="margin-top: 1rem;">
+                <a href="{{ url_for('manage_positions') }}" class="btn btn-success" style="padding: 0.5rem 1rem; font-size: 0.85rem;">+ Add Positions</a>
+                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="quickSetupElection()">🚀 Quick Setup</button>
+            </div>
+        </div>
+        {% elif total_nominees == 0 %}
+        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 1rem; margin-top: 1rem;">
+            <div style="color: #856404; font-weight: 600;">⚠️ Nominees Needed</div>
+            <div style="color: #856404; font-size: 0.9rem; margin-top: 0.5rem;">Add candidates to complete the election setup.</div>
+            <a href="{{ url_for('manage_nominees') }}" class="btn btn-success" style="margin-top: 1rem; padding: 0.5rem 1rem; font-size: 0.85rem;">+ Add Nominees</a>
+        </div>
+        {% endif %}
         {% endif %}
     </div>
 
@@ -164,6 +186,36 @@ function startElection() {
             .catch(error => {
                 alert('Network error occurred');
             });
+    }
+}
+
+
+function quickSetupElection() {
+    if (confirm('🚀 Would you like to add basic positions (President, VP, Secretary, Treasurer) to this election?')) {
+        const positions = [
+            { title: 'President', description: 'Student Body President', max_votes: 1 },
+            { title: 'Vice President', description: 'Student Body Vice President', max_votes: 1 },
+            { title: 'Secretary', description: 'Student Government Secretary', max_votes: 1 },
+            { title: 'Treasurer', description: 'Student Government Treasurer', max_votes: 1 }
+        ];
+        
+        Promise.all(positions.map(position => 
+            fetch('/api/positions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...position,
+                    election_id: {{ active_election.id if active_election else 'null' }}
+                })
+            })
+        ))
+        .then(() => {
+            alert('✅ Basic positions added! Now you can add nominees.');
+            location.reload();
+        })
+        .catch(error => {
+            alert('❌ Error setting up positions');
+        });
     }
 }
 

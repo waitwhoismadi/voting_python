@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50100%); color: white; text-align: center;">
+    <div class="card animate-fadeIn" style="background: linear-gradient(135deg, #E74C3C 0%, #2C3E50); color: white; text-align: center;">
         <h1 style="font-size: 3rem; margin-bottom: 1rem;">📊 Election Results</h1>
         {% if election %}
             <p style="font-size: 1.2rem;">{{ election.title }} - 
@@ -63,7 +63,7 @@
                 <div style="width: 200px; height: 10px; background: #e9ecef; border-radius: 10px; margin-top: 0.5rem;">
                     {% set percentage = (nominee.vote_count / total_votes * 100) if total_votes > 0 else 0 %}
                     <div style="width: {{ percentage }}%; height: 100%; 
-                                background: {% if loop.first %}linear-gradient(135deg, #ffd700 0%, #ffed4a 100%){% else %}linear-gradient(135deg, #E74C3C 0%, #2C3E50100%){% endif %}; 
+                                background: {% if loop.first %}linear-gradient(135deg, #ffd700 0%, #ffed4a 100%){% else %}linear-gradient(135deg, #E74C3C 0%, #2C3E50){% endif %}; 
                                 border-radius: 10px; transition: width 2s ease;">
                     </div>
                 </div>
